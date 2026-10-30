@@ -1,5 +1,43 @@
+/**
+ * @file lib/budget-math.ts
+ * @description Single responsibility: Mathematical calculations, cent-drift auto-correction,
+ * what-if guest-count rescaling, and budget over/under severity detection.
+ */
+
 import { BudgetItem, CurrencyCode } from './schemas';
 import { CURRENCY_SYMBOLS } from './constants';
+
+export type { BudgetItem };
+
+/**
+ * Auto-balances remaining unlocked items against locked items to reach targetTotal.
+ */
+export function autoBalanceRemainingItems(
+  items: BudgetItem[],
+  lockedIds: Set<string>,
+  targetTotal: number
+): BudgetItem[] {
+  const lockedItems = items.filter((i) => lockedIds.has(i.id));
+  const unlockedItems = items.filter((i) => !lockedIds.has(i.id));
+
+  const lockedSum = lockedItems.reduce((acc, i) => acc + i.allocatedAmount, 0);
+  const remainingForUnlocked = Math.max(0, targetTotal - lockedSum);
+
+  const balancedUnlocked = normalizeBudgetItems(unlockedItems, remainingForUnlocked);
+
+  return items.map((i) => {
+    if (lockedIds.has(i.id)) {
+      const pct = targetTotal > 0 ? Number(((i.allocatedAmount / targetTotal) * 100).toFixed(1)) : 0;
+      return { ...i, percentage: pct };
+    }
+    const found = balancedUnlocked.find((u) => u.id === i.id);
+    if (found) {
+      const pct = targetTotal > 0 ? Number(((found.allocatedAmount / targetTotal) * 100).toFixed(1)) : 0;
+      return { ...found, percentage: pct };
+    }
+    return i;
+  });
+}
 
 /**
  * Formats a numeric value with currency symbol and standard locale formatting.
@@ -92,7 +130,6 @@ export function normalizeBudgetItems(
   const drift = Math.round((totalBudget - newSum) * 100) / 100;
 
   if (Math.abs(drift) > 0.001 && normalized.length > 0) {
-    // Find index of item with largest allocated amount
     let maxIdx = 0;
     let maxVal = -1;
     for (let i = 0; i < normalized.length; i++) {
@@ -115,7 +152,6 @@ export function normalizeBudgetItems(
 
 /**
  * Updates a single budget item's amount, and recalculates its percentage.
- * Returns the modified items list with updated item and overall stats.
  */
 export function updateBudgetItemAmount(
   items: BudgetItem[],
@@ -152,40 +188,112 @@ export function updateBudgetItemAmount(
 }
 
 /**
- * Automatically rebalances remaining items after user edits one or more items.
+ * Checks if a category is variable per guest (e.g. Catering, Bar, Favors, Place Settings).
  */
-export function autoBalanceRemainingItems(
+export function isVariablePerGuestCategory(category: string): boolean {
+  const lower = category.toLowerCase();
+  return (
+    lower.includes('cater') ||
+    lower.includes('food') ||
+    lower.includes('bar') ||
+    lower.includes('drink') ||
+    lower.includes('favor') ||
+    lower.includes('menu') ||
+    lower.includes('refreshment') ||
+    lower.includes('tableware')
+  );
+}
+
+/**
+ * What-If Tool: Rescales per-guest categories live based on a simulated guest count slider.
+ */
+export function rescaleBudgetByGuestCount(
   items: BudgetItem[],
-  lockedItemIds: Set<string>,
+  originalGuestCount: number,
+  simulatedGuestCount: number,
   totalBudget: number
-): BudgetItem[] {
-  const lockedSum = items
-    .filter((i) => lockedItemIds.has(i.id))
-    .reduce((sum, i) => sum + i.allocatedAmount, 0);
+): {
+  items: BudgetItem[];
+  totalAllocated: number;
+  differenceFromBudget: number;
+  perGuestCost: number;
+} {
+  const safeOriginal = Math.max(1, originalGuestCount);
+  const safeSimulated = Math.max(1, simulatedGuestCount);
+  const guestRatio = safeSimulated / safeOriginal;
 
-  const remainingBudget = Math.max(0, totalBudget - lockedSum);
-  const unlockedItems = items.filter((i) => !lockedItemIds.has(i.id));
-
-  if (unlockedItems.length === 0) return items;
-
-  const currentUnlockedSum = unlockedItems.reduce((sum, i) => sum + i.allocatedAmount, 0);
-
-  const balancedUnlocked = normalizeBudgetItems(unlockedItems, remainingBudget);
-  const balancedMap = new Map(balancedUnlocked.map((i) => [i.id, i]));
-
-  return items.map((item) => {
-    if (lockedItemIds.has(item.id)) {
+  const rescaled = items.map((item) => {
+    const isPerGuest = item.isPerGuest ?? isVariablePerGuestCategory(item.category);
+    if (isPerGuest) {
+      const newAmount = Math.round(item.allocatedAmount * guestRatio);
       return {
         ...item,
-        percentage: Number(((item.allocatedAmount / totalBudget) * 100).toFixed(1)),
+        isPerGuest: true,
+        allocatedAmount: newAmount,
+        percentage: totalBudget > 0 ? Number(((newAmount / totalBudget) * 100).toFixed(1)) : 0,
       };
     }
-    const updated = balancedMap.get(item.id);
-    return updated
-      ? {
-          ...updated,
-          percentage: Number(((updated.allocatedAmount / totalBudget) * 100).toFixed(1)),
-        }
-      : item;
+    return item;
   });
+
+  const totalAllocated = rescaled.reduce((acc, curr) => acc + curr.allocatedAmount, 0);
+  const differenceFromBudget = Math.round((totalBudget - totalAllocated) * 100) / 100;
+  const perGuestCost = Math.round(totalAllocated / safeSimulated);
+
+  return {
+    items: rescaled,
+    totalAllocated,
+    differenceFromBudget,
+    perGuestCost,
+  };
+}
+
+export type BudgetSeverity = 'balanced' | 'under' | 'caution' | 'critical';
+
+/**
+ * Over/Under Budget Severity detector with human-friendly guidance.
+ */
+export function getBudgetSeverity(
+  totalAllocated: number,
+  totalBudget: number
+): {
+  severity: BudgetSeverity;
+  difference: number;
+  message: string;
+} {
+  const diff = Math.round((totalBudget - totalAllocated) * 100) / 100;
+
+  if (Math.abs(diff) <= 1) {
+    return {
+      severity: 'balanced',
+      difference: 0,
+      message: '100% Mathematically Balanced',
+    };
+  }
+
+  if (diff > 0) {
+    return {
+      severity: 'under',
+      difference: diff,
+      message: `Surplus of ${formatCurrency(diff)} unallocated`,
+    };
+  }
+
+  // Over budget
+  const overAmount = Math.abs(diff);
+  const overRatio = totalBudget > 0 ? overAmount / totalBudget : 1;
+
+  if (overRatio <= 0.08) {
+    return {
+      severity: 'caution',
+      difference: diff,
+      message: `Slightly Over Budget by ${formatCurrency(overAmount)} (within contingency margin)`,
+    };
+  }
+
+  return {
+    severity: 'critical',
+    difference: diff,
+    message: `Significantly Over Budget by ${formatCurrency(overAmount)} — consider trimming`,
+  };
 }

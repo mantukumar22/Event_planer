@@ -1,10 +1,14 @@
 'use client';
 
+/**
+ * Single Responsibility: Export Modal dialog facilitating downloads in CSV, JSON,
+ * RFC 5545 iCalendar (.ics), and Print/PDF binder formats.
+ */
 import React from 'react';
-import { Download, FileText, Table, Printer, X, Check } from 'lucide-react';
+import { Download, FileText, Table, Printer, X, Check, CalendarPlus } from 'lucide-react';
 import { EventPlan } from '@/lib/schemas';
 import { exportPlanAsCsv, exportPlanAsJson } from '@/lib/export-utils';
-import { CrownIcon } from './CrownIcon';
+import { downloadIcsFile } from '@/lib/ics-export';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -35,12 +39,18 @@ export function ExportModal({
     setTimeout(() => setDownloadedFormat(null), 3000);
   };
 
+  const handleIcs = () => {
+    downloadIcsFile(plan);
+    setDownloadedFormat('ics');
+    setTimeout(() => setDownloadedFormat(null), 3000);
+  };
+
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="export-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0612]/80 backdrop-blur-md animate-in fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0612]/85 backdrop-blur-md animate-in fade-in"
     >
       <div className="royal-glass rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-[var(--royal)]/40 text-[var(--text)]">
         <div className="flex items-center justify-between pb-4 border-b border-[var(--royal)]/25 mb-5">
@@ -52,33 +62,60 @@ export function ExportModal({
               <h3 id="export-modal-title" className="text-base font-display font-bold text-white">
                 Export & Share Plan
               </h3>
-              <p className="text-xs text-[var(--muted)]">Download formatted reports or print</p>
+              <p className="text-xs text-[var(--muted)]">Download formatted files or print</p>
             </div>
           </div>
 
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-xl text-[var(--muted)] hover:text-white hover:bg-[var(--surface-2)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--gold)]"
+            className="p-1.5 rounded-xl text-[var(--muted)] hover:text-white hover:bg-[var(--surface-2)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--gold)] cursor-pointer"
             aria-label="Close export modal"
           >
             <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
-        <div className="space-y-3.5">
-          {/* Option 1: CSV Spreadsheet */}
+        <div className="space-y-3">
+          {/* Option 1: Calendar iCalendar .ics */}
           <button
             type="button"
-            onClick={handleCsv}
-            className="w-full text-left p-4 rounded-2xl border border-[var(--royal)]/30 hover:border-[var(--gold)]/60 bg-[var(--surface-2)]/70 hover:bg-[var(--surface-2)] transition-all flex items-start gap-3.5 group cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--cyan)]"
+            onClick={handleIcs}
+            className="w-full text-left p-3.5 rounded-2xl border border-[var(--royal)]/30 hover:border-[var(--cyan)]/60 bg-[var(--surface-2)]/70 hover:bg-[var(--surface-2)] transition-all flex items-start gap-3.5 group cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--cyan)]"
           >
             <span className="p-2.5 rounded-xl bg-[var(--surface)] text-[var(--cyan)] border border-[var(--cyan)]/30 group-hover:scale-105 transition-all shrink-0">
-              <Table className="w-5 h-5" aria-hidden="true" />
+              <CalendarPlus className="w-5 h-5" aria-hidden="true" />
             </span>
             <span className="flex-1 block">
               <span className="flex items-center justify-between">
                 <span className="font-bold text-sm text-white group-hover:text-[var(--cyan)] transition-colors">
+                  iCalendar (.ics) Schedule
+                </span>
+                {downloadedFormat === 'ics' && (
+                  <span className="text-xs text-emerald-400 font-bold flex items-center gap-1">
+                    <Check className="w-3.5 h-3.5" aria-hidden="true" />
+                    Downloaded
+                  </span>
+                )}
+              </span>
+              <span className="text-xs text-[var(--muted)] mt-1 block leading-relaxed">
+                Sync milestones and day-of run-of-show directly to Apple Calendar, Google Calendar, or Outlook.
+              </span>
+            </span>
+          </button>
+
+          {/* Option 2: CSV Spreadsheet */}
+          <button
+            type="button"
+            onClick={handleCsv}
+            className="w-full text-left p-3.5 rounded-2xl border border-[var(--royal)]/30 hover:border-[var(--gold)]/60 bg-[var(--surface-2)]/70 hover:bg-[var(--surface-2)] transition-all flex items-start gap-3.5 group cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--cyan)]"
+          >
+            <span className="p-2.5 rounded-xl bg-[var(--surface)] text-[var(--gold)] border border-[var(--gold)]/30 group-hover:scale-105 transition-all shrink-0">
+              <Table className="w-5 h-5" aria-hidden="true" />
+            </span>
+            <span className="flex-1 block">
+              <span className="flex items-center justify-between">
+                <span className="font-bold text-sm text-white group-hover:text-[var(--gold)] transition-colors">
                   CSV Spreadsheet (.csv)
                 </span>
                 {downloadedFormat === 'csv' && (
@@ -89,16 +126,16 @@ export function ExportModal({
                 )}
               </span>
               <span className="text-xs text-[var(--muted)] mt-1 block leading-relaxed">
-                Multi-section formatted sheet for Excel, Google Sheets, or Numbers. Includes Budget, Timeline, and Vendors.
+                Multi-section sheet for Excel, Google Sheets, or Numbers. Includes Budget, Timeline, and Vendors.
               </span>
             </span>
           </button>
 
-          {/* Option 2: JSON Backup */}
+          {/* Option 3: JSON Backup */}
           <button
             type="button"
             onClick={handleJson}
-            className="w-full text-left p-4 rounded-2xl border border-[var(--royal)]/30 hover:border-[var(--gold)]/60 bg-[var(--surface-2)]/70 hover:bg-[var(--surface-2)] transition-all flex items-start gap-3.5 group cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--cyan)]"
+            className="w-full text-left p-3.5 rounded-2xl border border-[var(--royal)]/30 hover:border-[var(--magenta)]/60 bg-[var(--surface-2)]/70 hover:bg-[var(--surface-2)] transition-all flex items-start gap-3.5 group cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--cyan)]"
           >
             <span className="p-2.5 rounded-xl bg-[var(--surface)] text-[var(--magenta)] border border-[var(--magenta)]/30 group-hover:scale-105 transition-all shrink-0">
               <FileText className="w-5 h-5" aria-hidden="true" />
@@ -121,20 +158,20 @@ export function ExportModal({
             </span>
           </button>
 
-          {/* Option 3: Printable View */}
+          {/* Option 4: Printable View */}
           <button
             type="button"
             onClick={() => {
               onClose();
               onPrint();
             }}
-            className="w-full text-left p-4 rounded-2xl border border-[var(--royal)]/30 hover:border-[var(--gold)]/60 bg-[var(--surface-2)]/70 hover:bg-[var(--surface-2)] transition-all flex items-start gap-3.5 group cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--cyan)]"
+            className="w-full text-left p-3.5 rounded-2xl border border-[var(--royal)]/30 hover:border-white/60 bg-[var(--surface-2)]/70 hover:bg-[var(--surface-2)] transition-all flex items-start gap-3.5 group cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--cyan)]"
           >
-            <span className="p-2.5 rounded-xl bg-[var(--surface)] text-[var(--gold)] border border-[var(--gold)]/30 group-hover:scale-105 transition-all shrink-0">
+            <span className="p-2.5 rounded-xl bg-[var(--surface)] text-white border border-white/20 group-hover:scale-105 transition-all shrink-0">
               <Printer className="w-5 h-5" aria-hidden="true" />
             </span>
             <span className="flex-1 block">
-              <span className="font-bold text-sm text-white group-hover:text-[var(--gold)] transition-colors block">
+              <span className="font-bold text-sm text-white group-hover:text-white transition-colors block">
                 Printable Executive View / PDF
               </span>
               <span className="text-xs text-[var(--muted)] mt-1 block leading-relaxed">
@@ -144,7 +181,7 @@ export function ExportModal({
           </button>
         </div>
 
-        <div className="mt-6 pt-4 border-t border-[var(--royal)]/25 text-right">
+        <div className="mt-5 pt-4 border-t border-[var(--royal)]/25 text-right">
           <button
             type="button"
             onClick={onClose}

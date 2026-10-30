@@ -1,5 +1,9 @@
 'use client';
 
+/**
+ * Single Responsibility: Master Plan View assembling Budget, Timeline, Vendors, Ideas,
+ * AI Assumptions transparency panel, template fallback badges, and ARIA-compliant tabs.
+ */
 import React, { useState, useRef } from 'react';
 import {
   DollarSign,
@@ -10,6 +14,11 @@ import {
   Users,
   Printer,
   FileSpreadsheet,
+  Info,
+  ChevronDown,
+  ChevronUp,
+  ShieldAlert,
+  Zap,
 } from 'lucide-react';
 import { EventPlan, BudgetPlan, TimelinePlan, VendorPlan } from '@/lib/schemas';
 import { PlanTabId, PlanTabItem } from '@/lib/types';
@@ -40,10 +49,21 @@ export function PlanView({
   onPrint,
 }: PlanViewProps) {
   const [activeTab, setActiveTab] = useState<PlanTabId>('budget');
+  const [showAssumptions, setShowAssumptions] = useState(false);
   const tabRefs = useRef<Map<PlanTabId, HTMLButtonElement | null>>(new Map());
 
   const completedTasksCount = plan.timeline.tasks.filter((t) => t.completed).length;
   const bookedVendorsCount = plan.vendors.vendors.filter((v) => v.booked).length;
+
+  const defaultAssumptions = [
+    `Assumed catering and beverage allocation is scaled for ${plan.intake.guestCount} guests at standard local pricing in ${plan.intake.location}.`,
+    `Reserved a guaranteed contingency buffer of ${formatCurrency(plan.budget.contingencyAmount, plan.budget.currency)} (~${Math.round((plan.budget.contingencyAmount / plan.budget.totalBudget) * 100)}%) for overages.`,
+    `Timeline intervals assume an event date of ${plan.intake.eventDate} with major vendor contracts finalized at least 8-12 weeks prior.`,
+    `Decor and production scaled to reflect the "${plan.intake.themeVibe}" vibe with a high-contrast nightlife finish.`,
+  ];
+
+  const displayAssumptions =
+    plan.assumptions && plan.assumptions.length > 0 ? plan.assumptions : defaultAssumptions;
 
   const tabs: PlanTabItem[] = [
     {
@@ -95,6 +115,29 @@ export function PlanView({
 
   return (
     <div className="space-y-8">
+      {/* Live Region for Screen Readers */}
+      <div className="sr-only" aria-live="polite">
+        Viewing {tabs.find((t) => t.id === activeTab)?.label} section.
+      </div>
+
+      {/* Offline Template Plan Fallback Notice */}
+      {plan.isTemplateFallback && (
+        <div
+          role="status"
+          className="p-4 rounded-2xl bg-amber-950/40 border border-amber-500/40 text-amber-200 flex items-center justify-between gap-3 text-xs"
+        >
+          <div className="flex items-center gap-2.5">
+            <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" />
+            <span>
+              <strong className="text-white">Offline Template Blueprint:</strong> Generated via deterministic rule-based algorithms with guaranteed 8% contingency fund.
+            </span>
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 px-2.5 py-0.5 rounded-full border border-amber-500/40">
+            Rule-Based
+          </span>
+        </div>
+      )}
+
       {/* Executive Overview Header */}
       <section
         aria-labelledby="event-overview-title"
@@ -161,11 +204,49 @@ export function PlanView({
               className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--cyan)] hover:bg-[#55EEFF] text-[#04121A] text-xs font-extrabold transition-all shadow-md shadow-[var(--cyan)]/25 focus:outline-none focus:ring-2 focus:ring-[var(--cyan)] cursor-pointer"
             >
               <FileSpreadsheet className="w-4 h-4 text-[#04121A]" aria-hidden="true" />
-              <span>Export CSV / JSON</span>
+              <span>Export CSV / .ICS</span>
             </button>
           </div>
         </div>
       </section>
+
+      {/* AI Assumptions & Transparency Panel */}
+      <div className="royal-glass rounded-3xl p-5 border border-[var(--royal)]/30 print:hidden">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <Info className="w-4 h-4 text-[var(--cyan)]" />
+            <h3 className="text-sm font-bold text-white">AI Planning Assumptions & Transparency</h3>
+            <span className="text-xs text-[var(--muted)]">({displayAssumptions.length} assumptions made)</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowAssumptions(!showAssumptions)}
+            className="text-xs text-[var(--cyan)] hover:underline flex items-center gap-1 font-semibold cursor-pointer"
+            aria-expanded={showAssumptions}
+          >
+            <span>{showAssumptions ? 'Hide Details' : 'View Assumptions'}</span>
+            {showAssumptions ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+          </button>
+        </div>
+
+        {showAssumptions && (
+          <div className="mt-4 pt-3 border-t border-[var(--royal)]/20 space-y-2 text-xs text-[var(--muted)] animate-in fade-in">
+            <p className="text-white font-medium mb-1">
+              To verify and adjust the plan, here is what our model assumed based on your event inputs:
+            </p>
+            <ul className="list-disc list-inside space-y-1.5 pl-1">
+              {displayAssumptions.map((assumption, idx) => (
+                <li key={idx} className="leading-relaxed">
+                  <span className="text-[var(--text)]">{assumption}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="pt-2 text-[11px] text-[var(--gold)]">
+              Need to change an assumption? Use &quot;Regenerate&quot; on any section with custom instructions or chat with &quot;Ask the Planner&quot;.
+            </p>
+          </div>
+        )}
+      </div>
 
       {/* Screen Interactive Tabs */}
       <div className="print:hidden">
@@ -173,7 +254,7 @@ export function PlanView({
         <div
           role="tablist"
           aria-label="Event plan sections"
-          className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-[var(--royal)]/25 focus:outline-none"
+          className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 border-b border-[var(--royal)]/25 focus:outline-none"
         >
           {tabs.map((tab, idx) => {
             const isSelected = activeTab === tab.id;
@@ -190,30 +271,23 @@ export function PlanView({
                 tabIndex={isSelected ? 0 : -1}
                 onClick={() => setActiveTab(tab.id)}
                 onKeyDown={(e) => handleKeyDown(e, idx)}
-                className={`relative flex items-center gap-2 px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--cyan)] ${
+                className={`flex items-center gap-2 px-5 py-3 rounded-2xl font-bold text-xs sm:text-sm transition-all whitespace-nowrap cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--cyan)] ${
                   isSelected
-                    ? 'bg-[var(--surface-2)] text-white shadow-lg border border-[var(--gold)]/50'
-                    : 'bg-[var(--surface)] hover:bg-[var(--surface-2)] text-[var(--muted)] hover:text-white border border-[var(--royal)]/20'
+                    ? 'bg-[var(--cyan)] text-[#04121A] shadow-lg shadow-[var(--cyan)]/20 scale-[1.02]'
+                    : 'bg-[var(--surface-2)]/60 text-[var(--muted)] hover:text-white hover:bg-[var(--surface-2)] border border-[var(--royal)]/30'
                 }`}
               >
                 <span>{tab.label}</span>
                 {tab.badge && (
                   <span
-                    className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                    className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${
                       isSelected
-                        ? 'bg-[var(--gold)] text-[#04121A]'
-                        : 'bg-[var(--royal)]/30 text-[var(--muted)]'
+                        ? 'bg-[#04121A]/20 text-[#04121A]'
+                        : 'bg-[var(--surface)] text-[var(--gold)] border border-[var(--gold)]/20'
                     }`}
                   >
                     {tab.badge}
                   </span>
-                )}
-                {/* Gold active underline */}
-                {isSelected && (
-                  <span
-                    className="absolute -bottom-2.5 left-4 right-4 h-[3px] bg-[var(--gold)] rounded-full shadow-[0_0_8px_var(--gold)]"
-                    aria-hidden="true"
-                  />
                 )}
               </button>
             );
@@ -221,7 +295,7 @@ export function PlanView({
         </div>
 
         {/* Tab Panels */}
-        <div className="mt-8">
+        <div className="mt-6">
           <div
             role="tabpanel"
             id="panel-budget"
@@ -234,6 +308,7 @@ export function PlanView({
               <BudgetTab
                 budget={plan.budget}
                 currency={plan.budget.currency}
+                guestCount={plan.intake.guestCount}
                 onUpdateBudget={onUpdateBudget}
                 onOpenRegenerate={() => onOpenRegenerate('budget')}
               />
@@ -252,6 +327,7 @@ export function PlanView({
               <TimelineTab
                 timeline={plan.timeline}
                 eventDate={plan.intake.eventDate}
+                eventTitle={plan.intake.eventTitle}
                 onUpdateTimeline={onUpdateTimeline}
                 onOpenRegenerate={() => onOpenRegenerate('timeline')}
               />
@@ -306,6 +382,7 @@ export function PlanView({
           <BudgetTab
             budget={plan.budget}
             currency={plan.budget.currency}
+            guestCount={plan.intake.guestCount}
             onUpdateBudget={onUpdateBudget}
             onOpenRegenerate={() => {}}
           />
@@ -316,6 +393,7 @@ export function PlanView({
           <TimelineTab
             timeline={plan.timeline}
             eventDate={plan.intake.eventDate}
+            eventTitle={plan.intake.eventTitle}
             onUpdateTimeline={onUpdateTimeline}
             onOpenRegenerate={() => {}}
           />

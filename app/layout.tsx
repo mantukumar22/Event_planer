@@ -57,7 +57,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full scroll-smooth">
+    <html lang="en" className="h-full scroll-smooth dark" style={{ colorScheme: 'dark' }}>
       <body
         className={`${unbounded.variable} ${playfair.variable} ${jakarta.variable} font-sans min-h-full bg-[var(--ink)] text-[var(--text)] antialiased selection:bg-[var(--royal)] selection:text-[var(--text)] flex flex-col film-grain`}
         suppressHydrationWarning

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Palette,
   Sparkles,
@@ -9,6 +9,8 @@ import {
   Check,
   GlassWater,
   PartyPopper,
+  ThumbsUp,
+  ThumbsDown,
 } from 'lucide-react';
 import { IdeasPlan } from '@/lib/schemas';
 
@@ -23,6 +25,17 @@ export function PersonalizedIdeasTab({
   themeVibe,
   onOpenRegenerate,
 }: PersonalizedIdeasTabProps) {
+  const [sectionRating, setSectionRating] = useState<'up' | 'down' | null>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        return (localStorage.getItem('rating_ideas') as 'up' | 'down') || null;
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
+
   return (
     <div className="space-y-6">
       {/* Top Banner */}
@@ -264,6 +277,45 @@ export function PersonalizedIdeasTab({
             ))}
           </div>
         </section>
+      </div>
+
+      {/* Was This Helpful? Local Feedback Control */}
+      <div className="p-4 rounded-2xl royal-glass border border-[var(--royal)]/30 flex items-center justify-between text-xs text-[var(--muted)]">
+        <span>Were these personalized concepts and hacks helpful?</span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setSectionRating('up');
+              try { localStorage.setItem('rating_ideas', 'up'); } catch {}
+            }}
+            className={`p-2 rounded-xl border flex items-center gap-1.5 transition-all cursor-pointer ${
+              sectionRating === 'up'
+                ? 'bg-[var(--cyan)] text-[#04121A] border-[var(--cyan)] font-bold'
+                : 'bg-[var(--surface-2)] text-[var(--muted)] border-[var(--royal)]/30 hover:text-white'
+            }`}
+            aria-label="Thumbs up for ideas section"
+          >
+            <ThumbsUp className="w-3.5 h-3.5" />
+            <span>Yes</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setSectionRating('down');
+              try { localStorage.setItem('rating_ideas', 'down'); } catch {}
+            }}
+            className={`p-2 rounded-xl border flex items-center gap-1.5 transition-all cursor-pointer ${
+              sectionRating === 'down'
+                ? 'bg-rose-500 text-white border-rose-500 font-bold'
+                : 'bg-[var(--surface-2)] text-[var(--muted)] border-[var(--royal)]/30 hover:text-white'
+            }`}
+            aria-label="Thumbs down for ideas section"
+          >
+            <ThumbsDown className="w-3.5 h-3.5" />
+            <span>Needs work</span>
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -168,7 +168,7 @@ export function RegenerateModal({
                 if (error) setError(null);
               }}
               placeholder={`e.g. Make the ${sectionLabels[section].toLowerCase()} more budget-conscious and add outdoor contingency options.`}
-              className="w-full px-4 py-2.5 rounded-xl border border-[var(--royal)]/40 text-sm text-white bg-[var(--surface-2)] focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40 placeholder-[var(--muted)]/50"
+              className="w-full px-4 py-2.5 rounded-xl border border-[var(--royal)]/40 text-sm text-white bg-[var(--surface-2)] focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40 placeholder-[var(--muted)]/50 resize-y overflow-y-auto"
             />
           </div>
 

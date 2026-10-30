@@ -1,7 +1,12 @@
+/**
+ * Single Responsibility: API Route Handler for streaming "Ask the Planner" contextual chat.
+ */
 import { NextRequest, NextResponse } from 'next/server';
 import { ai } from '@/lib/gemini';
 import { ChatRequestSchema, ApiResponse } from '@/lib/schemas';
 import { globalRateLimiter, getClientIp } from '@/lib/rate-limiter';
+import { isMockAiEnabled } from '@/lib/gemini-fallback';
+import { sanitizeString } from '@/lib/guardrails';
 
 export const runtime = 'nodejs';
 
@@ -34,6 +39,30 @@ export async function POST(req: NextRequest) {
     }
 
     const { message, planContext, history } = validation.data;
+    const cleanMessage = sanitizeString(message, 500);
+
+    // MOCK_AI streaming response handler
+    if (isMockAiEnabled()) {
+      const mockReply = `Here is expert planner advice for ${planContext.eventTitle}: Given your ${planContext.currency} ${planContext.totalBudget} budget for ${planContext.guestCount} guests, your priority should be securing the venue and catering first. With ${planContext.completedTasksCount} of ${planContext.totalTasksCount} milestones achieved, you are on track!`;
+      const encoder = new TextEncoder();
+      const readable = new ReadableStream({
+        async start(controller) {
+          const words = mockReply.split(' ');
+          for (const word of words) {
+            controller.enqueue(encoder.encode(word + ' '));
+            await new Promise((r) => setTimeout(r, 25));
+          }
+          controller.close();
+        },
+      });
+      return new Response(readable, {
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'no-cache, no-transform',
+          'X-Content-Type-Options': 'nosniff',
+        },
+      });
+    }
 
     const systemInstruction = `You are the lead event planner for "${planContext.eventTitle}" (${planContext.eventType}).
 CURRENT PLAN CONTEXT:
@@ -53,11 +82,11 @@ DIRECTIVES:
     const contents = [
       ...history.map((h) => ({
         role: h.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: h.content }],
+        parts: [{ text: sanitizeString(h.content, 1000) }],
       })),
       {
         role: 'user',
-        parts: [{ text: message }],
+        parts: [{ text: cleanMessage }],
       },
     ];
 
@@ -77,7 +106,7 @@ DIRECTIVES:
           for await (const chunk of streamResponse) {
             const text = chunk.text;
             if (text) {
-              controller.enqueue(encoder.encode(text));
+              controller.enqueue(encoder.encode(sanitizeString(text, 2000)));
             }
           }
         } catch (streamErr) {

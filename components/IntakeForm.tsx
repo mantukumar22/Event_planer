@@ -1,12 +1,19 @@
 'use client';
 
-import React, { useState } from 'react';
+/**
+ * Single Responsibility: Guided event intake form with event-specific intelligence,
+ * bot defense (honeypot + minimum submit timing), and WCAG 2.2 AA error summary focus.
+ */
+import React, { useState, useRef } from 'react';
 import {
   Users,
   MapPin,
   Sparkles,
   HeartHandshake,
   Loader2,
+  AlertCircle,
+  CalendarCheck,
+  ShieldAlert,
 } from 'lucide-react';
 import {
   IntakeFormData,
@@ -14,6 +21,7 @@ import {
   EventType,
   CurrencyCode,
   VenueSetting,
+  BirthdayAgeGroup,
 } from '@/lib/schemas';
 import { CURRENCY_SYMBOLS } from '@/lib/constants';
 import { CrownIcon } from './CrownIcon';
@@ -25,6 +33,9 @@ interface IntakeFormProps {
 }
 
 export function IntakeForm({ initialData, onSubmit, isLoading }: IntakeFormProps) {
+  const mountTimeRef = useRef<number>(Date.now());
+  const errorSummaryRef = useRef<HTMLDivElement>(null);
+
   const [formData, setFormData] = useState<IntakeFormData>(
     initialData || {
       eventType: 'wedding',
@@ -40,14 +51,21 @@ export function IntakeForm({ initialData, onSubmit, isLoading }: IntakeFormProps
       dietaryRestrictions: '',
       accessibilityNeeds: '',
       venueSetting: 'indoor',
+      isMultiDay: false,
+      weddingCeremonies: '',
+      birthdayAgeGroup: 'adults',
+      celebrantAge: 30,
+      communityFocus: ['permits', 'volunteers', 'accessibility'],
+      honeypot: '',
     }
   );
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [botBlocked, setBotBlocked] = useState(false);
 
   const handleChange = (
     field: keyof IntakeFormData,
-    value: string | number
+    value: unknown
   ) => {
     setFormData((prev) => ({
       ...prev,
@@ -63,8 +81,32 @@ export function IntakeForm({ initialData, onSubmit, isLoading }: IntakeFormProps
     }
   };
 
+  type CommunityFocusItem = 'permits' | 'volunteers' | 'sponsors' | 'insurance' | 'accessibility';
+
+  const handleCommunityFocusToggle = (focusItem: CommunityFocusItem) => {
+    const current = (formData.communityFocus || []) as CommunityFocusItem[];
+    const exists = current.includes(focusItem);
+    const updated = exists ? current.filter((i) => i !== focusItem) : [...current, focusItem];
+    handleChange('communityFocus', updated);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // 1. Bot Honeypot Defense
+    if (formData.honeypot && formData.honeypot.trim().length > 0) {
+      console.warn('Bot submission caught via honeypot field.');
+      setBotBlocked(true);
+      return;
+    }
+
+    // 2. Minimum Submit Timing Defense (Human takes > 1.2 seconds to read & fill form)
+    const elapsed = Date.now() - mountTimeRef.current;
+    if (elapsed < 1200) {
+      console.warn('Submission faster than human threshold:', elapsed);
+      setBotBlocked(true);
+      return;
+    }
 
     const result = IntakeFormSchema.safeParse(formData);
     if (!result.success) {
@@ -77,16 +119,17 @@ export function IntakeForm({ initialData, onSubmit, isLoading }: IntakeFormProps
       }
       setErrors(fieldErrors);
 
-      // Focus first error field
-      const firstField = Object.keys(fieldErrors)[0];
-      const el = document.getElementById(firstField);
-      if (el) {
-        el.focus();
-      }
+      // Focus error summary at top for screen readers and keyboard users
+      setTimeout(() => {
+        if (errorSummaryRef.current) {
+          errorSummaryRef.current.focus();
+        }
+      }, 50);
       return;
     }
 
     setErrors({});
+    setBotBlocked(false);
     onSubmit(result.data);
   };
 
@@ -98,6 +141,63 @@ export function IntakeForm({ initialData, onSubmit, isLoading }: IntakeFormProps
       className="royal-glass rounded-3xl shadow-2xl p-6 sm:p-10 border border-[var(--royal)]/40 text-[var(--text)]"
       aria-labelledby="intake-form-heading"
     >
+      {/* Bot Blocked Notice */}
+      {botBlocked && (
+        <div
+          role="alert"
+          className="p-4 mb-6 rounded-2xl border border-rose-500/80 bg-rose-950/60 text-rose-200 flex items-center gap-3"
+        >
+          <ShieldAlert className="w-5 h-5 text-rose-400 shrink-0" />
+          <p className="text-xs font-semibold">
+            Automated submission detected. Please take a moment to review your event vision and try again.
+          </p>
+        </div>
+      )}
+
+      {/* Accessible Error Summary (WCAG 2.2 AA Pattern) */}
+      {Object.keys(errors).length > 0 && (
+        <div
+          ref={errorSummaryRef}
+          tabIndex={-1}
+          role="alert"
+          aria-labelledby="error-summary-title"
+          className="p-5 mb-8 rounded-2xl border-2 border-rose-500 bg-rose-950/80 text-rose-100 shadow-xl focus:outline-none focus:ring-4 focus:ring-rose-400"
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <AlertCircle className="w-5 h-5 text-rose-300" aria-hidden="true" />
+            <h3 id="error-summary-title" className="font-bold text-sm text-white">
+              Please resolve the {Object.keys(errors).length} error{Object.keys(errors).length > 1 ? 's' : ''} below:
+            </h3>
+          </div>
+          <ul className="list-disc list-inside space-y-1 text-xs text-rose-200">
+            {Object.entries(errors).map(([field, msg]) => (
+              <li key={field}>
+                <a
+                  href={`#${field}`}
+                  className="underline hover:text-white font-medium focus:outline-none focus:ring-2 focus:ring-white rounded px-1"
+                >
+                  {msg}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Invisible Honeypot field for anti-bot defense */}
+      <div className="sr-only" aria-hidden="true">
+        <label htmlFor="website-honeypot">Leave this empty</label>
+        <input
+          type="text"
+          id="website-honeypot"
+          name="honeypot"
+          value={formData.honeypot || ''}
+          onChange={(e) => handleChange('honeypot', e.target.value)}
+          tabIndex={-1}
+          autoComplete="off"
+        />
+      </div>
+
       <div className="border-b border-[var(--royal)]/25 pb-6 mb-8">
         <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[var(--surface-2)] border border-[var(--gold)]/30 mb-3">
           <CrownIcon size={14} className="text-[var(--gold)]" />
@@ -112,8 +212,8 @@ export function IntakeForm({ initialData, onSubmit, isLoading }: IntakeFormProps
           Event Vision & Specifications
         </h2>
         <p className="text-sm text-[var(--muted)] mt-2 leading-relaxed">
-          Provide your event parameters. Our AI planner will calculate an accurate budget,
-          build a milestone timeline, and prepare a custom vendor roadmap.
+          Provide your event parameters. Our AI planner adapts calculations, timeline milestones,
+          and vendor checklists specifically to weddings, birthdays, and community gatherings.
         </p>
       </div>
 
@@ -126,9 +226,9 @@ export function IntakeForm({ initialData, onSubmit, isLoading }: IntakeFormProps
             </legend>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
-                { type: 'wedding', label: 'Wedding', desc: 'Vows, reception, ceremony' },
-                { type: 'birthday', label: 'Birthday', desc: 'Milestone or kid’s party' },
-                { type: 'community', label: 'Community', desc: 'Fundraiser or block party' },
+                { type: 'wedding', label: 'Wedding', desc: 'Ceremonies, reception & vows' },
+                { type: 'birthday', label: 'Birthday', desc: 'Milestone, kids, or adult gala' },
+                { type: 'community', label: 'Community', desc: 'Permits, sponsors & volunteers' },
               ].map(({ type, label, desc }) => {
                 const isSelected = formData.eventType === type;
                 return (
@@ -167,6 +267,130 @@ export function IntakeForm({ initialData, onSubmit, isLoading }: IntakeFormProps
           </fieldset>
         </div>
 
+        {/* Dynamic Event-Specific Intelligence Section */}
+        {formData.eventType === 'wedding' && (
+          <div className="p-5 rounded-2xl bg-[var(--surface-2)]/70 border border-[var(--gold)]/30 space-y-4">
+            <div className="flex items-center gap-2">
+              <CrownIcon size={16} className="text-[var(--gold)]" />
+              <h3 className="text-sm font-bold text-white">Wedding Intelligence & Ceremonies</h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex items-center gap-3 pt-2">
+                <input
+                  type="checkbox"
+                  id="isMultiDay"
+                  checked={formData.isMultiDay || false}
+                  onChange={(e) => handleChange('isMultiDay', e.target.checked)}
+                  className="w-4 h-4 rounded border-[var(--royal)]/40 text-[var(--cyan)] focus:ring-[var(--cyan)]"
+                />
+                <label htmlFor="isMultiDay" className="text-sm font-semibold text-white cursor-pointer">
+                  Multi-day or Weekend Event (e.g., Welcome Party, Day-After Brunch)
+                </label>
+              </div>
+
+              <div>
+                <label htmlFor="weddingCeremonies" className="block text-xs font-bold text-white mb-1">
+                  Specific Ceremonies or Traditions
+                </label>
+                <input
+                  type="text"
+                  id="weddingCeremonies"
+                  value={formData.weddingCeremonies || ''}
+                  onChange={(e) => handleChange('weddingCeremonies', e.target.value)}
+                  placeholder="e.g. Sangeet, Tea Ceremony, Chuppah, Catholic Mass"
+                  className="w-full px-3 py-2 rounded-xl border border-[var(--royal)]/40 text-xs text-white bg-[var(--surface)] focus:ring-2 focus:ring-[var(--gold)]/30"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {formData.eventType === 'birthday' && (
+          <div className="p-5 rounded-2xl bg-[var(--surface-2)]/70 border border-[var(--magenta)]/30 space-y-4">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[var(--magenta)]" />
+              <h3 className="text-sm font-bold text-white">Birthday Age-Group & Dynamics</h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-white mb-1.5">Age Group</label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {(['kids', 'teens', 'adults', 'milestone'] as BirthdayAgeGroup[]).map((group) => (
+                    <button
+                      key={group}
+                      type="button"
+                      onClick={() => handleChange('birthdayAgeGroup', group)}
+                      className={`px-3 py-2 rounded-xl text-xs font-bold capitalize border transition-all ${
+                        formData.birthdayAgeGroup === group
+                          ? 'bg-[var(--cyan)] text-[#04121A] border-[var(--cyan)]'
+                          : 'bg-[var(--surface)] text-[var(--muted)] border-[var(--royal)]/30 hover:border-white'
+                      }`}
+                    >
+                      {group}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="celebrantAge" className="block text-xs font-bold text-white mb-1">
+                  Celebrant Age (e.g., 1st, 18th, 21st, 30th, 50th)
+                </label>
+                <input
+                  type="number"
+                  id="celebrantAge"
+                  min="1"
+                  max="120"
+                  value={formData.celebrantAge || ''}
+                  onChange={(e) => handleChange('celebrantAge', parseInt(e.target.value, 10) || undefined)}
+                  className="w-full px-3 py-2 rounded-xl border border-[var(--royal)]/40 text-xs text-white bg-[var(--surface)] focus:ring-2 focus:ring-[var(--cyan)]"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {formData.eventType === 'community' && (
+          <div className="p-5 rounded-2xl bg-[var(--surface-2)]/70 border border-[var(--cyan)]/30 space-y-4">
+            <div className="flex items-center gap-2">
+              <CalendarCheck className="w-4 h-4 text-[var(--cyan)]" />
+              <h3 className="text-sm font-bold text-white">Community Logistics & Compliance Checklist</h3>
+            </div>
+            <p className="text-xs text-[var(--muted)]">
+              Select mandatory focus areas to embed into your timeline and vendor requests:
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+              {[
+                { id: 'permits' as const, label: 'City & Park Permits' },
+                { id: 'volunteers' as const, label: 'Volunteer Rostering' },
+                { id: 'sponsors' as const, label: 'Sponsor Outreach' },
+                { id: 'insurance' as const, label: 'Liability Insurance' },
+                { id: 'accessibility' as const, label: 'ADA Accessibility' },
+              ].map(({ id, label }) => {
+                const checked = (formData.communityFocus || []).includes(id);
+                return (
+                  <label
+                    key={id}
+                    className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-xs cursor-pointer font-medium transition-all ${
+                      checked
+                        ? 'border-[var(--cyan)] bg-[var(--cyan)]/10 text-white'
+                        : 'border-[var(--royal)]/30 bg-[var(--surface)] text-[var(--muted)] hover:border-[var(--royal-light)]'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => handleCommunityFocusToggle(id)}
+                      className="w-4 h-4 rounded text-[var(--cyan)] border-[var(--royal)]/40 focus:ring-[var(--cyan)]"
+                    />
+                    <span>{label}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Event Title & Date */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
@@ -182,7 +406,7 @@ export function IntakeForm({ initialData, onSubmit, isLoading }: IntakeFormProps
               name="eventTitle"
               value={formData.eventTitle}
               onChange={(e) => handleChange('eventTitle', e.target.value)}
-              placeholder="e.g. Maya & Alex’s Spring Celebration"
+              placeholder="e.g. Maya & Alex’s Royal Celebration"
               aria-describedby={errors.eventTitle ? 'eventTitle-error' : 'eventTitle-help'}
               aria-invalid={!!errors.eventTitle}
               className={`w-full px-4 py-3 rounded-xl border text-sm text-white bg-[var(--surface-2)]/80 placeholder-[var(--muted)]/50 transition-all focus:outline-none focus:ring-2 ${
@@ -285,14 +509,21 @@ export function IntakeForm({ initialData, onSubmit, isLoading }: IntakeFormProps
               Total Budget <span className="text-[var(--cyan)]" aria-hidden="true">*</span>
             </label>
             <div className="relative">
+              <span
+                className="absolute left-3.5 top-3.5 text-sm font-black text-[var(--gold)] pointer-events-none"
+                aria-hidden="true"
+              >
+                {CURRENCY_SYMBOLS[formData.currency]}
+              </span>
               <input
                 type="number"
                 id="totalBudget"
                 name="totalBudget"
                 min="100"
-                step="50"
+                max="10000000"
+                step="100"
                 value={formData.totalBudget || ''}
-                onChange={(e) => handleChange('totalBudget', parseFloat(e.target.value) || 0)}
+                onChange={(e) => handleChange('totalBudget', parseInt(e.target.value, 10) || 0)}
                 aria-describedby={errors.totalBudget ? 'totalBudget-error' : 'totalBudget-help'}
                 aria-invalid={!!errors.totalBudget}
                 className={`w-full pl-10 pr-4 py-3 rounded-xl border text-sm text-white bg-[var(--surface-2)]/80 transition-all focus:outline-none focus:ring-2 ${
@@ -301,9 +532,6 @@ export function IntakeForm({ initialData, onSubmit, isLoading }: IntakeFormProps
                     : 'border-[var(--royal)]/40 focus:border-[var(--gold)] focus:ring-[var(--gold)]/30'
                 }`}
               />
-              <span className="absolute left-3.5 top-3 text-sm font-bold text-[var(--gold)] pointer-events-none">
-                {CURRENCY_SYMBOLS[formData.currency]}
-              </span>
             </div>
             {errors.totalBudget ? (
               <p id="totalBudget-error" className="text-xs text-rose-400 mt-1.5 font-semibold" role="alert">
@@ -311,7 +539,7 @@ export function IntakeForm({ initialData, onSubmit, isLoading }: IntakeFormProps
               </p>
             ) : (
               <p id="totalBudget-help" className="text-xs text-[var(--muted)] mt-1.5">
-                Allocated across all vendors.
+                Allocated across all event categories.
               </p>
             )}
           </div>
@@ -321,27 +549,22 @@ export function IntakeForm({ initialData, onSubmit, isLoading }: IntakeFormProps
               htmlFor="currency"
               className="block text-sm font-bold text-white mb-1.5"
             >
-              Currency
+              Currency <span className="text-[var(--cyan)]" aria-hidden="true">*</span>
             </label>
             <select
               id="currency"
               name="currency"
               value={formData.currency}
               onChange={(e) => handleChange('currency', e.target.value as CurrencyCode)}
-              aria-describedby="currency-help"
-              className="w-full px-4 py-3 rounded-xl border border-[var(--royal)]/40 text-sm text-white bg-[var(--surface-2)] focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/30 focus:border-[var(--gold)]"
+              className="w-full px-4 py-3 rounded-xl border border-[var(--royal)]/40 text-sm text-white bg-[var(--surface-2)]/80 transition-all focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/30 focus:border-[var(--gold)] cursor-pointer"
             >
-              <option value="USD">USD ($ - US Dollar)</option>
-              <option value="EUR">EUR (€ - Euro)</option>
-              <option value="GBP">GBP (£ - British Pound)</option>
-              <option value="CAD">CAD (CA$ - Canadian Dollar)</option>
-              <option value="AUD">AUD (AU$ - Australian Dollar)</option>
-              <option value="JPY">JPY (¥ - Japanese Yen)</option>
-              <option value="INR">INR (₹ - Indian Rupee)</option>
+              <option value="USD" className="bg-[#140B24] text-white">USD ($) - US Dollar</option>
+              <option value="EUR" className="bg-[#140B24] text-white">EUR (€) - Euro</option>
+              <option value="GBP" className="bg-[#140B24] text-white">GBP (£) - British Pound</option>
+              <option value="CAD" className="bg-[#140B24] text-white">CAD ($) - Canadian Dollar</option>
+              <option value="AUD" className="bg-[#140B24] text-white">AUD ($) - Australian Dollar</option>
+              <option value="INR" className="bg-[#140B24] text-white">INR (₹) - Indian Rupee</option>
             </select>
-            <p id="currency-help" className="text-xs text-[var(--muted)] mt-1.5">
-              Display & calculation currency.
-            </p>
           </div>
         </div>
 
@@ -361,7 +584,7 @@ export function IntakeForm({ initialData, onSubmit, isLoading }: IntakeFormProps
                 name="location"
                 value={formData.location}
                 onChange={(e) => handleChange('location', e.target.value)}
-                placeholder="e.g. San Diego, CA or London, UK"
+                placeholder="e.g. Austin, TX or London, UK"
                 aria-describedby={errors.location ? 'location-error' : 'location-help'}
                 aria-invalid={!!errors.location}
                 className={`w-full pl-10 pr-4 py-3 rounded-xl border text-sm text-white bg-[var(--surface-2)]/80 placeholder-[var(--muted)]/50 transition-all focus:outline-none focus:ring-2 ${
@@ -381,7 +604,7 @@ export function IntakeForm({ initialData, onSubmit, isLoading }: IntakeFormProps
               </p>
             ) : (
               <p id="location-help" className="text-xs text-[var(--muted)] mt-1.5">
-                Guides local vendor rates and climate tips.
+                City, region, or destination for localized pricing.
               </p>
             )}
           </div>
@@ -393,28 +616,34 @@ export function IntakeForm({ initialData, onSubmit, isLoading }: IntakeFormProps
             >
               Theme or Aesthetic Vibe <span className="text-[var(--cyan)]" aria-hidden="true">*</span>
             </label>
-            <input
-              type="text"
-              id="themeVibe"
-              name="themeVibe"
-              value={formData.themeVibe}
-              onChange={(e) => handleChange('themeVibe', e.target.value)}
-              placeholder="e.g. Modern Boho Chic, Neon Cyberpunk, Royal Velvet"
-              aria-describedby={errors.themeVibe ? 'themeVibe-error' : 'themeVibe-help'}
-              aria-invalid={!!errors.themeVibe}
-              className={`w-full px-4 py-3 rounded-xl border text-sm text-white bg-[var(--surface-2)]/80 placeholder-[var(--muted)]/50 transition-all focus:outline-none focus:ring-2 ${
-                errors.themeVibe
-                  ? 'border-rose-500 focus:ring-rose-500'
-                  : 'border-[var(--royal)]/40 focus:border-[var(--gold)] focus:ring-[var(--gold)]/30'
-              }`}
-            />
+            <div className="relative">
+              <input
+                type="text"
+                id="themeVibe"
+                name="themeVibe"
+                value={formData.themeVibe}
+                onChange={(e) => handleChange('themeVibe', e.target.value)}
+                placeholder="e.g. Dark Royal Gen Z, Moody Botanical, Neon Chic"
+                aria-describedby={errors.themeVibe ? 'themeVibe-error' : 'themeVibe-help'}
+                aria-invalid={!!errors.themeVibe}
+                className={`w-full pl-10 pr-4 py-3 rounded-xl border text-sm text-white bg-[var(--surface-2)]/80 placeholder-[var(--muted)]/50 transition-all focus:outline-none focus:ring-2 ${
+                  errors.themeVibe
+                    ? 'border-rose-500 focus:ring-rose-500'
+                    : 'border-[var(--royal)]/40 focus:border-[var(--gold)] focus:ring-[var(--gold)]/30'
+                }`}
+              />
+              <Sparkles
+                className="w-4 h-4 text-[var(--muted)] absolute left-3.5 top-3.5 pointer-events-none"
+                aria-hidden="true"
+              />
+            </div>
             {errors.themeVibe ? (
               <p id="themeVibe-error" className="text-xs text-rose-400 mt-1.5 font-semibold" role="alert">
                 {errors.themeVibe}
               </p>
             ) : (
               <p id="themeVibe-help" className="text-xs text-[var(--muted)] mt-1.5">
-                Drives color palette, decor, and mood recommendations.
+                Guiding concept for decor, music, and lighting.
               </p>
             )}
           </div>
@@ -423,29 +652,29 @@ export function IntakeForm({ initialData, onSubmit, isLoading }: IntakeFormProps
         {/* Venue Setting */}
         <div>
           <fieldset>
-            <legend className="text-sm font-bold text-white mb-2">
-              Venue Setting
+            <legend className="text-sm font-bold text-white mb-3">
+              Venue Setting <span className="text-[var(--cyan)]" aria-hidden="true">*</span>
             </legend>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
-                { val: 'indoor', label: 'Indoor', sub: 'Ballroom, restaurant, hall' },
-                { val: 'outdoor', label: 'Outdoor', sub: 'Garden, beach, park' },
-                { val: 'hybrid', label: 'Hybrid', sub: 'Indoor pavilion with patio' },
-              ].map(({ val, label, sub }) => (
+                { setting: 'indoor', label: 'Indoor', sub: 'Ballroom, loft, hall' },
+                { setting: 'outdoor', label: 'Outdoor', sub: 'Garden, beach, rooftop' },
+                { setting: 'hybrid', label: 'Hybrid / Both', sub: 'Indoor reception + outdoor vows' },
+              ].map(({ setting, label, sub }) => (
                 <label
-                  key={val}
+                  key={setting}
                   className={`flex flex-col p-3.5 rounded-2xl border cursor-pointer transition-all ${
-                    formData.venueSetting === val
-                      ? 'border-[var(--gold)] bg-[var(--royal)]/25 ring-1 ring-[var(--gold)]'
-                      : 'border-[var(--royal)]/30 bg-[var(--surface-2)]/50 hover:border-[var(--royal-light)]'
+                    formData.venueSetting === setting
+                      ? 'border-[var(--gold)] bg-[var(--royal)]/25 ring-1 ring-[var(--gold)]/40'
+                      : 'border-[var(--royal)]/30 bg-[var(--surface-2)]/60 hover:border-[var(--royal-light)]'
                   }`}
                 >
                   <input
                     type="radio"
                     name="venueSetting"
-                    value={val}
-                    checked={formData.venueSetting === val}
-                    onChange={() => handleChange('venueSetting', val as VenueSetting)}
+                    value={setting}
+                    checked={formData.venueSetting === setting}
+                    onChange={() => handleChange('venueSetting', setting as VenueSetting)}
                     className="sr-only"
                   />
                   <span className="font-bold text-sm text-white">{label}</span>
@@ -469,11 +698,11 @@ export function IntakeForm({ initialData, onSubmit, isLoading }: IntakeFormProps
               id="culturalTraditions"
               name="culturalTraditions"
               rows={2}
-              value={formData.culturalTraditions}
+              value={formData.culturalTraditions || ''}
               onChange={(e) => handleChange('culturalTraditions', e.target.value)}
               placeholder="e.g. Sangeet evening, Polish bridal dance, tea ceremony"
               aria-describedby="culturalTraditions-help"
-              className="w-full px-4 py-3 rounded-xl border border-[var(--royal)]/40 text-sm text-white bg-[var(--surface-2)]/80 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/30 focus:border-[var(--gold)] placeholder-[var(--muted)]/50"
+              className="w-full px-4 py-3 rounded-xl border border-[var(--royal)]/40 text-sm text-white bg-[var(--surface-2)]/80 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/30 focus:border-[var(--gold)] placeholder-[var(--muted)]/50 resize-y overflow-y-auto"
             />
             <p id="culturalTraditions-help" className="text-xs text-[var(--muted)] mt-1.5">
               Customs you want woven into the schedule and decor.
@@ -491,11 +720,11 @@ export function IntakeForm({ initialData, onSubmit, isLoading }: IntakeFormProps
               id="mustHaves"
               name="mustHaves"
               rows={2}
-              value={formData.mustHaves}
+              value={formData.mustHaves || ''}
               onChange={(e) => handleChange('mustHaves', e.target.value)}
-              placeholder="e.g. Live band, photo booth, espresso cart, late-night taco truck"
+              placeholder="e.g. Live DJ, photo booth, espresso cart, late-night taco truck"
               aria-describedby="mustHaves-help"
-              className="w-full px-4 py-3 rounded-xl border border-[var(--royal)]/40 text-sm text-white bg-[var(--surface-2)]/80 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/30 focus:border-[var(--gold)] placeholder-[var(--muted)]/50"
+              className="w-full px-4 py-3 rounded-xl border border-[var(--royal)]/40 text-sm text-white bg-[var(--surface-2)]/80 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/30 focus:border-[var(--gold)] placeholder-[var(--muted)]/50 resize-y overflow-y-auto"
             />
             <p id="mustHaves-help" className="text-xs text-[var(--muted)] mt-1.5">
               Prioritized in the budget and vendor allocation.
@@ -516,7 +745,7 @@ export function IntakeForm({ initialData, onSubmit, isLoading }: IntakeFormProps
               type="text"
               id="dietaryRestrictions"
               name="dietaryRestrictions"
-              value={formData.dietaryRestrictions}
+              value={formData.dietaryRestrictions || ''}
               onChange={(e) => handleChange('dietaryRestrictions', e.target.value)}
               placeholder="e.g. Vegan, Gluten-Free, Halal, Nut-free"
               aria-describedby="dietaryRestrictions-help"
@@ -538,7 +767,7 @@ export function IntakeForm({ initialData, onSubmit, isLoading }: IntakeFormProps
               type="text"
               id="accessibilityNeeds"
               name="accessibilityNeeds"
-              value={formData.accessibilityNeeds}
+              value={formData.accessibilityNeeds || ''}
               onChange={(e) => handleChange('accessibilityNeeds', e.target.value)}
               placeholder="e.g. Wheelchair ramp, quiet sensory room, shaded seating"
               aria-describedby="accessibilityNeeds-help"

@@ -231,7 +231,7 @@ export function ChatPlanner({ plan }: ChatPlannerProps) {
           </div>
 
           {/* Suggested Prompts */}
-          <div className="p-2.5 bg-[var(--surface-2)]/60 border-t border-[var(--royal)]/20 flex items-center gap-2 overflow-x-auto text-[11px]">
+          <div className="p-2.5 bg-[var(--surface-2)]/60 border-t border-[var(--royal)]/20 flex items-center gap-2 overflow-x-auto no-scrollbar text-[11px]">
             <span className="text-[var(--gold)] font-bold px-1 shrink-0">Try:</span>
             {sampleQuestions.map((q, idx) => (
               <button

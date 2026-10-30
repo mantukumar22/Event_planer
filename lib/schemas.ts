@@ -1,3 +1,9 @@
+/**
+ * @file lib/schemas.ts
+ * @description Single responsibility: Zod validation schemas and TypeScript types for event intake,
+ * budget, timeline, vendors, personalized ideas, assumptions, and API requests.
+ */
+
 import { z } from 'zod';
 
 export const EventTypeEnum = z.enum(['wedding', 'birthday', 'community']);
@@ -20,8 +26,11 @@ export type VenueSetting = z.infer<typeof VenueSettingEnum>;
 export const PriorityEnum = z.enum(['High', 'Medium', 'Low']);
 export type Priority = z.infer<typeof PriorityEnum>;
 
+export const BirthdayAgeGroupEnum = z.enum(['kids', 'teens', 'adults', 'milestone']);
+export type BirthdayAgeGroup = z.infer<typeof BirthdayAgeGroupEnum>;
+
 /**
- * Intake Form Schema
+ * Intake Form Schema with event-specific intelligence fields
  */
 export const IntakeFormSchema = z.object({
   eventType: EventTypeEnum,
@@ -57,27 +66,49 @@ export const IntakeFormSchema = z.object({
     .string()
     .trim()
     .max(300, 'Cultural preferences must be under 300 characters')
-    .optional()
-    .default(''),
+    .optional(),
   mustHaves: z
     .string()
     .trim()
     .max(300, 'Must-haves must be under 300 characters')
-    .optional()
-    .default(''),
+    .optional(),
   dietaryRestrictions: z
     .string()
     .trim()
     .max(200, 'Dietary restrictions must be under 200 characters')
-    .optional()
-    .default(''),
+    .optional(),
   accessibilityNeeds: z
     .string()
     .trim()
     .max(200, 'Accessibility needs must be under 200 characters')
-    .optional()
-    .default(''),
+    .optional(),
   venueSetting: VenueSettingEnum.default('indoor'),
+
+  // Event-specific intelligence extensions (optional for full backwards compatibility)
+  // Wedding specific
+  isMultiDay: z.boolean().optional(),
+  weddingCeremonies: z
+    .string()
+    .trim()
+    .max(200, 'Ceremonies description must be under 200 characters')
+    .optional(),
+
+  // Birthday specific
+  birthdayAgeGroup: BirthdayAgeGroupEnum.optional(),
+  celebrantAge: z
+    .number()
+    .int()
+    .min(1)
+    .max(120)
+    .optional(),
+
+  // Community event specific
+  communityFocus: z
+    .array(z.enum(['permits', 'volunteers', 'sponsors', 'insurance', 'accessibility']))
+    .optional(),
+
+  // Bot mitigation: honeypot (should remain empty)
+  honeypot: z.string().optional(),
 });
 
 export type IntakeFormData = z.infer<typeof IntakeFormSchema>;
@@ -92,6 +123,7 @@ export const BudgetItemSchema = z.object({
   allocatedAmount: z.number().min(0),
   notes: z.string(),
   color: z.string().optional(),
+  isPerGuest: z.boolean().optional(),
 });
 export type BudgetItem = z.infer<typeof BudgetItemSchema>;
 
@@ -119,9 +151,23 @@ export const TimelineTaskSchema = z.object({
 });
 export type TimelineTask = z.infer<typeof TimelineTaskSchema>;
 
+/**
+ * Run-of-Show Day-Of Schedule Item
+ */
+export const DayOfScheduleItemSchema = z.object({
+  time: z.string(),
+  activity: z.string(),
+  leadRole: z.string().optional(),
+  owner: z.string().optional(),
+  location: z.string().optional(),
+  notes: z.string().optional(),
+});
+export type DayOfScheduleItem = z.infer<typeof DayOfScheduleItemSchema>;
+
 export const TimelinePlanSchema = z.object({
   phases: z.array(z.string()).min(2),
   tasks: z.array(TimelineTaskSchema).min(5),
+  dayOfSchedule: z.array(DayOfScheduleItemSchema).optional(),
 });
 export type TimelinePlan = z.infer<typeof TimelinePlanSchema>;
 
@@ -143,6 +189,7 @@ export type VendorItem = z.infer<typeof VendorItemSchema>;
 
 export const VendorPlanSchema = z.object({
   vendors: z.array(VendorItemSchema).min(3),
+  tips: z.array(z.string()).optional(),
 });
 export type VendorPlan = z.infer<typeof VendorPlanSchema>;
 
@@ -183,15 +230,17 @@ export type IdeasPlan = z.infer<typeof IdeasPlanSchema>;
  * Complete Event Plan Schema
  */
 export const EventPlanSchema = z.object({
-  id: z.string(),
+  id: z.string().optional(),
   createdAt: z.string(),
-  updatedAt: z.string(),
+  updatedAt: z.string().optional(),
   intake: IntakeFormSchema,
   executiveSummary: z.string(),
   budget: BudgetPlanSchema,
   timeline: TimelinePlanSchema,
   vendors: VendorPlanSchema,
   ideas: IdeasPlanSchema,
+  assumptions: z.array(z.string()).optional(),
+  isTemplateFallback: z.boolean().optional(),
 });
 export type EventPlan = z.infer<typeof EventPlanSchema>;
 
@@ -204,6 +253,16 @@ export const RegenerateSectionSchema = z.object({
   currentPlan: EventPlanSchema,
 });
 export type RegenerateSectionRequest = z.infer<typeof RegenerateSectionSchema>;
+
+/**
+ * Budget Trim Request Schema
+ */
+export const TrimBudgetSchema = z.object({
+  currentPlan: EventPlanSchema,
+  targetBudget: z.number().min(100),
+  priorities: z.array(z.string()).optional().default([]),
+});
+export type TrimBudgetRequest = z.infer<typeof TrimBudgetSchema>;
 
 /**
  * Chat Request Schema

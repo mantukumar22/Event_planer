@@ -28,6 +28,7 @@
   --cyan: #22E5FF;
   --text: #F5F3FF;
   --muted: #B9B0D6;
+  color-scheme: dark;
 }
 
 @media (prefers-color-scheme: light) {
@@ -42,7 +43,74 @@
     --cyan: #06B6D4;
     --text: #1E1035;
     --muted: #5B4F73;
+    color-scheme: light;
   }
+}
+
+/* Global scrollbar enhancements: replace default stark-white OS scrollbars */
+html {
+  color-scheme: dark;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(167, 139, 250, 0.25) transparent;
+}
+
+/* Hide default chunky browser scrollbar arrow buttons */
+::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Sleek WebKit scrollbar track and thumb */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(167, 139, 250, 0.25);
+  border-radius: 9999px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(245, 196, 81, 0.5);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Clean up textarea scrollbars and resize corners */
+textarea {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(167, 139, 250, 0.25) transparent;
+  overflow-y: auto;
+}
+
+textarea::-webkit-resizer {
+  background-color: transparent;
+  border-bottom: 2px solid rgba(167, 139, 250, 0.3);
+  border-right: 2px solid rgba(167, 139, 250, 0.3);
+}
+
+/* Utility to completely hide scrollbar while preserving smooth scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none !important; /* IE and Edge */
+  scrollbar-width: none !important; /* Firefox */
 }
 
 /* Film grain texture */
