@@ -2,16 +2,12 @@
 
 import React, { useState } from 'react';
 import {
-  Calendar,
-  CheckCircle2,
-  Circle,
   Clock,
   Filter,
   Sparkles,
   User,
-  AlertCircle,
 } from 'lucide-react';
-import { TimelinePlan, TimelineTask, Priority } from '@/lib/schemas';
+import { TimelinePlan, Priority } from '@/lib/schemas';
 
 interface TimelineTabProps {
   timeline: TimelinePlan;
@@ -67,33 +63,33 @@ export function TimelineTab({
     : Array.from(new Set(tasks.map((t) => t.phase)));
 
   const priorityStyles: Record<Priority, { bg: string; text: string; border: string }> = {
-    High: { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200' },
-    Medium: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
-    Low: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+    High: { bg: 'bg-rose-950/60', text: 'text-rose-300', border: 'border-rose-500/40' },
+    Medium: { bg: 'bg-amber-950/60', text: 'text-amber-300', border: 'border-amber-500/40' },
+    Low: { bg: 'bg-emerald-950/60', text: 'text-emerald-300', border: 'border-emerald-500/40' },
   };
 
   return (
     <div className="space-y-6">
       {/* Top Banner & Progress Meter */}
-      <div className="bg-white rounded-2xl p-5 sm:p-6 border border-stone-200 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="royal-glass rounded-3xl p-5 sm:p-6 border border-[var(--royal)]/40 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="w-full md:w-auto">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+            <span className="text-xs font-bold uppercase tracking-wider text-[var(--gold)] bg-[var(--surface-2)] px-3 py-1 rounded-full border border-[var(--gold)]/30">
               Schedule & Milestones
             </span>
-            <span className="text-xs font-semibold text-stone-600 bg-stone-100 px-2.5 py-1 rounded-full">
+            <span className="text-xs font-semibold text-[var(--cyan)] bg-[var(--surface-2)] px-3 py-1 rounded-full border border-[var(--cyan)]/30">
               Target: {eventDate || 'Upcoming'}
             </span>
           </div>
 
           <div className="mt-3 flex items-center gap-4">
             <div className="flex-1 min-w-[200px] max-w-xs">
-              <div className="flex justify-between text-xs text-stone-600 font-semibold mb-1">
+              <div className="flex justify-between text-xs text-[var(--muted)] font-semibold mb-1">
                 <span>Milestone Progress</span>
-                <span>{progressPercent}%</span>
+                <span className="text-[var(--gold)] font-bold">{progressPercent}%</span>
               </div>
               <div
-                className="w-full h-2.5 bg-stone-200 rounded-full overflow-hidden"
+                className="w-full h-2.5 bg-[var(--surface-2)] rounded-full overflow-hidden border border-[var(--royal)]/30"
                 role="progressbar"
                 aria-valuenow={progressPercent}
                 aria-valuemin={0}
@@ -101,13 +97,13 @@ export function TimelineTab({
                 aria-label={`Milestone progress: ${completedCount} of ${totalCount} completed`}
               >
                 <div
-                  className="h-full bg-gradient-to-r from-amber-500 to-emerald-500 transition-all duration-300 rounded-full"
+                  className="h-full bg-gradient-to-r from-[var(--royal-light)] via-[var(--magenta)] to-[var(--gold)] transition-all duration-300 rounded-full"
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
             </div>
 
-            <span className="text-xs text-stone-500 font-medium">
+            <span className="text-xs text-[var(--muted)] font-medium">
               {completedCount} of {totalCount} tasks completed
             </span>
           </div>
@@ -116,17 +112,17 @@ export function TimelineTab({
         <button
           type="button"
           onClick={onOpenRegenerate}
-          className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer ml-auto md:ml-0"
+          className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-[var(--surface-2)] hover:bg-[var(--royal)]/30 text-[var(--gold)] border border-[var(--gold)]/40 text-xs font-bold transition-all focus:outline-none focus:ring-2 focus:ring-[var(--gold)] cursor-pointer ml-auto md:ml-0"
         >
-          <Sparkles className="w-3.5 h-3.5 text-amber-600" aria-hidden="true" />
+          <Sparkles className="w-3.5 h-3.5 text-[var(--gold)]" aria-hidden="true" />
           <span>Regenerate Timeline</span>
         </button>
       </div>
 
       {/* Filters Toolbar */}
-      <div className="bg-white rounded-2xl p-4 border border-stone-200 shadow-sm flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-1.5 text-xs text-stone-500 font-bold uppercase tracking-wider mr-2">
-          <Filter className="w-3.5 h-3.5 text-amber-600" aria-hidden="true" />
+      <div className="royal-glass rounded-2xl p-4 border border-[var(--royal)]/30 shadow-md flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-1.5 text-xs text-[var(--gold)] font-bold uppercase tracking-wider mr-2">
+          <Filter className="w-3.5 h-3.5 text-[var(--gold)]" aria-hidden="true" />
           <span>Filters:</span>
         </div>
 
@@ -139,7 +135,7 @@ export function TimelineTab({
             id="filter-phase"
             value={selectedPhase}
             onChange={(e) => setSelectedPhase(e.target.value)}
-            className="px-3 py-1.5 text-xs font-medium text-stone-800 bg-stone-50 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="px-3 py-1.5 text-xs font-semibold text-white bg-[var(--surface-2)] border border-[var(--royal)]/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40"
           >
             <option value="all">All Phases ({allPhases.length})</option>
             {allPhases.map((phase) => (
@@ -159,7 +155,7 @@ export function TimelineTab({
             id="filter-priority"
             value={selectedPriority}
             onChange={(e) => setSelectedPriority(e.target.value)}
-            className="px-3 py-1.5 text-xs font-medium text-stone-800 bg-stone-50 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="px-3 py-1.5 text-xs font-semibold text-white bg-[var(--surface-2)] border border-[var(--royal)]/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40"
           >
             <option value="all">All Priorities</option>
             <option value="High">High Priority</option>
@@ -177,7 +173,7 @@ export function TimelineTab({
             id="filter-status"
             value={filterCompleted}
             onChange={(e) => setFilterCompleted(e.target.value as any)}
-            className="px-3 py-1.5 text-xs font-medium text-stone-800 bg-stone-50 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="px-3 py-1.5 text-xs font-semibold text-white bg-[var(--surface-2)] border border-[var(--royal)]/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40"
           >
             <option value="all">All Statuses</option>
             <option value="pending">Pending Only</option>
@@ -185,7 +181,7 @@ export function TimelineTab({
           </select>
         </div>
 
-        <span className="text-xs text-stone-500 ml-auto">
+        <span className="text-xs text-[var(--muted)] ml-auto font-medium">
           Showing {filteredTasks.length} of {tasks.length} tasks
         </span>
       </div>
@@ -204,22 +200,22 @@ export function TimelineTab({
               <section
                 key={phase}
                 aria-labelledby={`phase-heading-${phase.replace(/\s+/g, '-').toLowerCase()}`}
-                className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden"
+                className="royal-glass rounded-3xl border border-[var(--royal)]/40 shadow-xl overflow-hidden"
               >
-                <div className="bg-stone-50/80 px-5 py-3.5 border-b border-stone-200 flex items-center justify-between">
+                <div className="bg-[var(--surface-2)]/80 px-6 py-4 border-b border-[var(--royal)]/25 flex items-center justify-between">
                   <h3
                     id={`phase-heading-${phase.replace(/\s+/g, '-').toLowerCase()}`}
-                    className="font-bold text-sm text-stone-900 flex items-center gap-2"
+                    className="font-display font-bold text-sm sm:text-base text-white flex items-center gap-2.5"
                   >
-                    <Clock className="w-4 h-4 text-amber-600" aria-hidden="true" />
+                    <Clock className="w-4 h-4 text-[var(--cyan)]" aria-hidden="true" />
                     <span>{phase}</span>
                   </h3>
-                  <span className="text-xs font-semibold text-stone-500 bg-white px-2.5 py-0.5 rounded-full border border-stone-200">
+                  <span className="text-xs font-bold text-[var(--gold)] bg-[var(--surface)] px-3 py-1 rounded-full border border-[var(--gold)]/30">
                     {phaseCompleted} / {phaseTasks.length} done
                   </span>
                 </div>
 
-                <ul className="divide-y divide-stone-100">
+                <ul className="divide-y divide-[var(--royal)]/15">
                   {phaseTasks.map((task) => {
                     const checkId = `task-check-${task.id}`;
                     const pStyle = priorityStyles[task.priority] || priorityStyles.Medium;
@@ -228,7 +224,7 @@ export function TimelineTab({
                       <li
                         key={task.id}
                         className={`p-4 sm:p-5 transition-colors flex items-start gap-3.5 ${
-                          task.completed ? 'bg-stone-50/50' : 'hover:bg-amber-50/30'
+                          task.completed ? 'bg-[var(--surface)]/40 opacity-70' : 'hover:bg-[var(--surface-2)]/50'
                         }`}
                       >
                         <div className="pt-0.5">
@@ -237,7 +233,7 @@ export function TimelineTab({
                             type="checkbox"
                             checked={task.completed}
                             onChange={() => handleToggleTask(task.id)}
-                            className="w-5 h-5 rounded-md border-stone-300 text-amber-600 focus:ring-amber-500 cursor-pointer"
+                            className="w-5 h-5 rounded-md border-[var(--royal)]/40 text-[var(--cyan)] focus:ring-[var(--cyan)] cursor-pointer"
                             aria-label={`Mark "${task.title}" as ${task.completed ? 'incomplete' : 'complete'}`}
                           />
                         </div>
@@ -248,33 +244,33 @@ export function TimelineTab({
                               htmlFor={checkId}
                               className={`text-sm font-bold cursor-pointer ${
                                 task.completed
-                                  ? 'line-through text-stone-400'
-                                  : 'text-stone-900'
+                                  ? 'line-through text-[var(--muted)]'
+                                  : 'text-white'
                               }`}
                             >
                               {task.title}
                             </label>
 
                             <span
-                              className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${pStyle.bg} ${pStyle.text} ${pStyle.border}`}
+                              className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${pStyle.bg} ${pStyle.text} ${pStyle.border}`}
                             >
                               {task.priority} Priority
                             </span>
 
-                            <span className="text-[11px] font-medium text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full flex items-center gap-1">
-                              <Clock className="w-3 h-3 text-stone-400" aria-hidden="true" />
+                            <span className="text-[10px] font-semibold text-[var(--muted)] bg-[var(--surface-2)] px-2.5 py-0.5 rounded-full flex items-center gap-1 border border-[var(--royal)]/20">
+                              <Clock className="w-3 h-3 text-[var(--cyan)]" aria-hidden="true" />
                               {task.timeOffset}
                             </span>
 
-                            <span className="text-[11px] font-medium text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full flex items-center gap-1">
-                              <User className="w-3 h-3 text-stone-400" aria-hidden="true" />
+                            <span className="text-[10px] font-semibold text-[var(--muted)] bg-[var(--surface-2)] px-2.5 py-0.5 rounded-full flex items-center gap-1 border border-[var(--royal)]/20">
+                              <User className="w-3 h-3 text-[var(--gold)]" aria-hidden="true" />
                               {task.owner}
                             </span>
                           </div>
 
                           <p
-                            className={`text-xs mt-1 leading-relaxed ${
-                              task.completed ? 'text-stone-400' : 'text-stone-600'
+                            className={`text-xs mt-1.5 leading-relaxed ${
+                              task.completed ? 'text-[var(--muted)]/70' : 'text-[var(--muted)]'
                             }`}
                           >
                             {task.description}

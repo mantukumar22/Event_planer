@@ -3,6 +3,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Header } from '@/components/Header';
 import { Hero } from '@/components/Hero';
+import { MarqueeStrip } from '@/components/MarqueeStrip';
+import { AboutStats } from '@/components/AboutStats';
+import { EventCards } from '@/components/EventCards';
+import { HowItWorks } from '@/components/HowItWorks';
+import { SamplePlanMockup } from '@/components/SamplePlanMockup';
 import { IntakeForm } from '@/components/IntakeForm';
 import { PlanView } from '@/components/PlanView';
 import { ChatPlanner } from '@/components/ChatPlanner';
@@ -20,9 +25,9 @@ import { PlanTabId } from '@/lib/types';
 import {
   loadPlanFromStorage,
   savePlanToStorage,
-  clearPlanFromStorage,
 } from '@/lib/storage';
-import { AlertCircle, WifiOff, CheckCircle2, ArrowUp } from 'lucide-react';
+import { SAMPLE_EVENT_PLAN } from '@/lib/samplePlan';
+import { AlertCircle, WifiOff, CheckCircle2, Crown, Sparkles } from 'lucide-react';
 
 export default function HomePage() {
   const [currentPlan, setCurrentPlan] = useState<EventPlan | null>(null);
@@ -37,6 +42,7 @@ export default function HomePage() {
 
   const formSectionRef = useRef<HTMLDivElement>(null);
   const planSectionRef = useRef<HTMLDivElement>(null);
+  const sampleSectionRef = useRef<HTMLDivElement>(null);
 
   // Load plan from localStorage on initial client mount
   useEffect(() => {
@@ -84,11 +90,26 @@ export default function HomePage() {
     planSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Preset Selection from Hero cards
+  const scrollToSample = () => {
+    sampleSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Preset Selection from EventCards
   const handleSelectPreset = (presetData: IntakeFormData) => {
     setFormData(presetData);
     scrollToForm();
-    showToast(`Loaded "${presetData.eventTitle}" preset. Tweak or submit!`);
+    showToast(`Loaded "${presetData.eventTitle}" blueprint. Customize and generate!`);
+  };
+
+  // Load Sample Plan directly
+  const handleLoadSample = () => {
+    setCurrentPlan(SAMPLE_EVENT_PLAN);
+    setFormData(SAMPLE_EVENT_PLAN.intake);
+    savePlanToStorage(SAMPLE_EVENT_PLAN);
+    showToast('Sample royal wedding plan loaded successfully!');
+    setTimeout(() => {
+      scrollToPlan();
+    }, 100);
   };
 
   // Submit Intake Form to generate a new plan
@@ -111,7 +132,7 @@ export default function HomePage() {
 
       setCurrentPlan(result.data);
       savePlanToStorage(result.data);
-      showToast('Event plan successfully created!');
+      showToast('Royal event plan successfully created!');
 
       setTimeout(() => {
         scrollToPlan();
@@ -202,13 +223,14 @@ export default function HomePage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col">
-      {/* Header Landmark */}
+    <div className="flex-1 flex flex-col min-h-screen bg-[var(--ink)] text-[var(--text)]">
+      {/* Sticky Glass Navbar */}
       <Header
         currentPlan={currentPlan}
         onNewPlan={handleNewPlan}
         onOpenExport={() => setIsExportOpen(true)}
         onPrint={handlePrint}
+        onStartPlanning={scrollToForm}
         isSavedLocally={!!currentPlan}
       />
 
@@ -216,36 +238,53 @@ export default function HomePage() {
       {isOffline && (
         <div
           role="status"
-          className="bg-amber-600 text-white text-xs sm:text-sm font-semibold py-2 px-4 text-center flex items-center justify-center gap-2 print:hidden"
+          className="bg-[var(--surface-2)] text-[var(--gold)] text-xs sm:text-sm font-bold py-2.5 px-4 text-center flex items-center justify-center gap-2 border-b border-[var(--gold)]/30 print:hidden"
         >
-          <WifiOff className="w-4 h-4" aria-hidden="true" />
-          <span>You appear to be offline. Saved plans remain editable locally.</span>
+          <WifiOff className="w-4 h-4 text-[var(--gold)]" aria-hidden="true" />
+          <span>You appear to be offline. Saved plans remain completely editable locally.</span>
         </div>
       )}
 
-      {/* Hero Section */}
+      {/* Full-bleed Moody Hero Section */}
       <Hero
-        onSelectPreset={handleSelectPreset}
         onScrollToForm={scrollToForm}
+        onPreviewSample={scrollToSample}
       />
 
-      {/* Main Content Landmark */}
-      <main id="main-content" tabIndex={-1} className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full focus:outline-none">
+      {/* Marquee Infinite Scrolling Strip */}
+      <MarqueeStrip />
+
+      {/* About + Stats Section */}
+      <AboutStats />
+
+      {/* Made for Every Celebration Section */}
+      <EventCards onSelectPreset={handleSelectPreset} />
+
+      {/* How It Works Section */}
+      <HowItWorks />
+
+      {/* Static Interactive Sample Plan Preview */}
+      <div ref={sampleSectionRef}>
+        <SamplePlanMockup onLoadSample={handleLoadSample} />
+      </div>
+
+      {/* Main Content Landmark: Plan Dashboard & Guided Intake Form */}
+      <main id="main-content" tabIndex={-1} className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full focus:outline-none">
         {/* Error Notification Banner */}
         {errorMsg && (
           <div
             role="alert"
-            className="mb-8 p-4 rounded-2xl bg-rose-50 border border-rose-300 text-rose-800 text-sm flex items-start gap-3 shadow-xs"
+            className="mb-8 p-4 rounded-2xl bg-rose-950/80 border border-rose-500/50 text-rose-200 text-sm flex items-start gap-3 shadow-lg"
           >
-            <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" aria-hidden="true" />
+            <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" aria-hidden="true" />
             <div className="flex-1">
-              <h3 className="font-bold text-rose-900">Unable to generate plan</h3>
-              <p className="mt-0.5 text-rose-700">{errorMsg}</p>
+              <h3 className="font-bold text-white">Unable to generate plan</h3>
+              <p className="mt-0.5 text-rose-300">{errorMsg}</p>
             </div>
             <button
               type="button"
               onClick={() => setErrorMsg(null)}
-              className="text-rose-500 hover:text-rose-800 text-xs font-bold px-2 py-1"
+              className="text-rose-400 hover:text-white text-xs font-bold px-2 py-1"
             >
               Dismiss
             </button>
@@ -256,16 +295,16 @@ export default function HomePage() {
         {successToast && (
           <div
             role="status"
-            className="fixed top-20 right-5 z-50 bg-stone-900 text-white text-xs sm:text-sm px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 border border-stone-700 animate-in fade-in slide-in-from-top-2"
+            className="fixed top-24 right-5 z-50 bg-[var(--surface-2)] text-white text-xs sm:text-sm px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 border border-[var(--gold)]/40 animate-in fade-in slide-in-from-top-2"
           >
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" aria-hidden="true" />
-            <span>{successToast}</span>
+            <span className="font-semibold">{successToast}</span>
           </div>
         )}
 
-        {/* Plan Section if generated */}
+        {/* Active Plan Dashboard Bento Layout */}
         {currentPlan && (
-          <div ref={planSectionRef} className="mb-14 scroll-mt-20">
+          <div ref={planSectionRef} className="mb-20 scroll-mt-24">
             <PlanView
               plan={currentPlan}
               onUpdateBudget={handleUpdateBudget}
@@ -279,13 +318,17 @@ export default function HomePage() {
         )}
 
         {/* Guided Intake Form Section */}
-        <div ref={formSectionRef} className="scroll-mt-20 max-w-3xl mx-auto">
+        <section id="planner" ref={formSectionRef} className="scroll-mt-24 max-w-3xl mx-auto">
           {currentPlan && (
-            <div className="mb-4 text-center">
-              <h2 className="text-lg font-bold text-stone-800">
-                Want to tweak parameters or start another event?
+            <div className="mb-8 text-center">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--surface-2)] border border-[var(--gold)]/30 text-xs font-bold text-[var(--gold)] mb-2">
+                <Sparkles className="w-3.5 h-3.5 text-[var(--gold)]" />
+                <span>Create New Blueprint</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-display font-extrabold text-white">
+                Want to tweak parameters or start another celebration?
               </h2>
-              <p className="text-xs text-stone-500">
+              <p className="text-xs sm:text-sm text-[var(--muted)] mt-1">
                 Fill in the form below to produce a fresh event plan.
               </p>
             </div>
@@ -296,7 +339,7 @@ export default function HomePage() {
             onSubmit={handleGeneratePlan}
             isLoading={isLoading}
           />
-        </div>
+        </section>
       </main>
 
       {/* Floating Chat Planner */}
@@ -322,8 +365,8 @@ export default function HomePage() {
         />
       )}
 
-      {/* Footer Landmark */}
-      <Footer />
+      {/* Final CTA & Royal Dark Footer */}
+      <Footer onScrollToForm={scrollToForm} />
     </div>
   );
 }

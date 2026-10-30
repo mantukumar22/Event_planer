@@ -11,30 +11,37 @@ export const CURRENCY_SYMBOLS: Record<CurrencyCode, string> = {
 };
 
 export const CATEGORY_COLORS: Record<string, string> = {
-  'Venue & Rentals': '#4F46E5', // Indigo
-  'Catering & Bar': '#059669', // Emerald
-  'Decor & Floral': '#E11D48', // Rose
-  'Entertainment & Music': '#D97706', // Amber
-  'Photography & Video': '#7C3AED', // Violet
-  'Attire & Styling': '#2563EB', // Blue
-  'Stationery & Favors': '#0891B2', // Cyan
-  'Contingency Buffer': '#475569', // Slate
-  'Logistics & Permits': '#0D9488', // Teal
-  'Marketing & Signage': '#EA580C', // Orange
-  'Default': '#64748B',
+  'Venue & Grounds': '#6D28D9', // Royal purple
+  'Venue & Rentals': '#6D28D9',
+  'Catering & Craft Bar': '#22E5FF', // Cyan
+  'Catering & Bar': '#22E5FF',
+  'Decor & Royal Florals': '#E879F9', // Magenta
+  'Decor & Floral': '#E879F9',
+  'Entertainment & Music': '#F5C451', // Gold
+  'Music & Audio Experience': '#F5C451',
+  'Photography & Cinema': '#A78BFA', // Lavender
+  'Photography & Video': '#A78BFA',
+  'Attire, Styling & Favors': '#38BDF8', // Sky
+  'Attire & Styling': '#38BDF8',
+  'Stationery & Favors': '#C084FC',
+  'Contingency Reserve': '#94A3B8', // Slate
+  'Contingency Buffer': '#94A3B8',
+  'Logistics & Permits': '#34D399', // Emerald
+  'Marketing & Signage': '#FB923C', // Amber
+  'Default': '#6D28D9',
 };
 
 export const COLOR_SWATCHES = [
-  '#4F46E5',
-  '#059669',
-  '#E11D48',
-  '#D97706',
-  '#7C3AED',
-  '#2563EB',
-  '#0891B2',
-  '#475569',
-  '#0D9488',
-  '#EA580C',
+  '#6D28D9', // Royal purple
+  '#22E5FF', // Cyan
+  '#E879F9', // Magenta
+  '#F5C451', // Gold
+  '#A78BFA', // Lavender
+  '#38BDF8', // Sky
+  '#34D399', // Mint
+  '#F472B6', // Rose
+  '#FB923C', // Orange
+  '#94A3B8', // Slate
 ];
 
 export const PRESET_EVENTS: {

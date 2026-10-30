@@ -8,7 +8,6 @@ import {
   Sparkles,
   MapPin,
   Users,
-  Clock,
   Printer,
   FileSpreadsheet,
 } from 'lucide-react';
@@ -19,6 +18,7 @@ import { BudgetTab } from './tabs/BudgetTab';
 import { TimelineTab } from './tabs/TimelineTab';
 import { VendorChecklistTab } from './tabs/VendorChecklistTab';
 import { PersonalizedIdeasTab } from './tabs/PersonalizedIdeasTab';
+import { CrownIcon } from './CrownIcon';
 
 interface PlanViewProps {
   plan: EventPlan;
@@ -98,68 +98,69 @@ export function PlanView({
       {/* Executive Overview Header */}
       <section
         aria-labelledby="event-overview-title"
-        className="bg-white rounded-2xl p-6 sm:p-8 border border-stone-200 shadow-sm relative overflow-hidden"
+        className="royal-glass rounded-3xl p-6 sm:p-8 border border-[var(--royal)]/40 shadow-2xl relative overflow-hidden"
       >
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-          <div className="space-y-3 max-w-3xl">
+          <div className="space-y-3.5 max-w-3xl">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-800 bg-amber-100/80 px-3 py-1 rounded-full border border-amber-200">
-                {plan.intake.eventType} Plan
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[var(--gold)] bg-[var(--surface-2)] px-3 py-1 rounded-full border border-[var(--gold)]/30">
+                <CrownIcon size={12} className="text-[var(--gold)]" />
+                <span>{plan.intake.eventType} Plan</span>
               </span>
-              <span className="text-xs text-stone-500 font-medium">
+              <span className="text-xs text-[var(--muted)] font-medium">
                 Created {plan.createdAt.split('T')[0]}
               </span>
             </div>
 
             <h2
               id="event-overview-title"
-              className="text-2xl sm:text-3xl font-serif font-extrabold text-stone-900 tracking-tight"
+              className="text-2xl sm:text-4xl font-display font-extrabold text-white tracking-tight leading-tight"
             >
               {plan.intake.eventTitle}
             </h2>
 
-            <p className="text-sm sm:text-base text-stone-600 leading-relaxed font-sans">
+            <p className="text-sm sm:text-base text-[var(--muted)] leading-relaxed">
               {plan.executiveSummary}
             </p>
 
             {/* Quick Metrics Badges */}
-            <div className="pt-2 flex flex-wrap items-center gap-4 text-xs font-semibold text-stone-700">
-              <div className="flex items-center gap-1.5 bg-stone-50 px-3 py-1.5 rounded-xl border border-stone-200">
-                <Calendar className="w-4 h-4 text-amber-600" aria-hidden="true" />
+            <div className="pt-2 flex flex-wrap items-center gap-3 text-xs font-semibold">
+              <div className="flex items-center gap-2 bg-[var(--surface-2)]/80 text-white px-3.5 py-2 rounded-xl border border-[var(--royal)]/30">
+                <Calendar className="w-4 h-4 text-[var(--cyan)]" aria-hidden="true" />
                 <span>{plan.intake.eventDate}</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-stone-50 px-3 py-1.5 rounded-xl border border-stone-200">
-                <DollarSign className="w-4 h-4 text-emerald-600" aria-hidden="true" />
-                <span>
+              <div className="flex items-center gap-2 bg-[var(--surface-2)]/80 text-[var(--gold)] px-3.5 py-2 rounded-xl border border-[var(--gold)]/30">
+                <DollarSign className="w-4 h-4 text-[var(--gold)]" aria-hidden="true" />
+                <span className="font-bold">
                   {formatCurrency(plan.budget.totalBudget, plan.budget.currency)} {plan.budget.currency}
                 </span>
               </div>
-              <div className="flex items-center gap-1.5 bg-stone-50 px-3 py-1.5 rounded-xl border border-stone-200">
-                <Users className="w-4 h-4 text-indigo-600" aria-hidden="true" />
+              <div className="flex items-center gap-2 bg-[var(--surface-2)]/80 text-white px-3.5 py-2 rounded-xl border border-[var(--royal)]/30">
+                <Users className="w-4 h-4 text-[var(--magenta)]" aria-hidden="true" />
                 <span>{plan.intake.guestCount} Guests</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-stone-50 px-3 py-1.5 rounded-xl border border-stone-200">
-                <MapPin className="w-4 h-4 text-rose-600" aria-hidden="true" />
+              <div className="flex items-center gap-2 bg-[var(--surface-2)]/80 text-white px-3.5 py-2 rounded-xl border border-[var(--royal)]/30">
+                <MapPin className="w-4 h-4 text-[var(--royal-light)]" aria-hidden="true" />
                 <span>{plan.intake.location}</span>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row md:flex-col gap-2 shrink-0 print:hidden">
+          <div className="flex flex-col sm:flex-row md:flex-col gap-2.5 shrink-0 print:hidden">
             <button
               type="button"
               onClick={onPrint}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold transition-colors border border-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--surface-2)] hover:bg-[var(--royal)]/30 text-white text-xs font-bold transition-all border border-[var(--royal)]/40 focus:outline-none focus:ring-2 focus:ring-[var(--cyan)] cursor-pointer"
             >
-              <Printer className="w-4 h-4 text-stone-600" aria-hidden="true" />
+              <Printer className="w-4 h-4 text-[var(--muted)]" aria-hidden="true" />
               <span>Print Binder View</span>
             </button>
             <button
               type="button"
               onClick={onOpenExport}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-semibold transition-colors border border-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--cyan)] hover:bg-[#55EEFF] text-[#04121A] text-xs font-extrabold transition-all shadow-md shadow-[var(--cyan)]/25 focus:outline-none focus:ring-2 focus:ring-[var(--cyan)] cursor-pointer"
             >
-              <FileSpreadsheet className="w-4 h-4 text-amber-700" aria-hidden="true" />
+              <FileSpreadsheet className="w-4 h-4 text-[#04121A]" aria-hidden="true" />
               <span>Export CSV / JSON</span>
             </button>
           </div>
@@ -168,11 +169,11 @@ export function PlanView({
 
       {/* Screen Interactive Tabs */}
       <div className="print:hidden">
-        {/* ARIA tablist */}
+        {/* ARIA tablist with dark royal pills and gold underline */}
         <div
           role="tablist"
           aria-label="Event plan sections"
-          className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-stone-200 focus:outline-none"
+          className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-[var(--royal)]/25 focus:outline-none"
         >
           {tabs.map((tab, idx) => {
             const isSelected = activeTab === tab.id;
@@ -189,23 +190,30 @@ export function PlanView({
                 tabIndex={isSelected ? 0 : -1}
                 onClick={() => setActiveTab(tab.id)}
                 onKeyDown={(e) => handleKeyDown(e, idx)}
-                className={`flex items-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-500 ${
+                className={`relative flex items-center gap-2 px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--cyan)] ${
                   isSelected
-                    ? 'bg-stone-900 text-white shadow-md'
-                    : 'bg-white hover:bg-stone-100 text-stone-600 border border-stone-200'
+                    ? 'bg-[var(--surface-2)] text-white shadow-lg border border-[var(--gold)]/50'
+                    : 'bg-[var(--surface)] hover:bg-[var(--surface-2)] text-[var(--muted)] hover:text-white border border-[var(--royal)]/20'
                 }`}
               >
                 <span>{tab.label}</span>
                 {tab.badge && (
                   <span
-                    className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                    className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
                       isSelected
-                        ? 'bg-amber-400 text-stone-950'
-                        : 'bg-stone-100 text-stone-600'
+                        ? 'bg-[var(--gold)] text-[#04121A]'
+                        : 'bg-[var(--royal)]/30 text-[var(--muted)]'
                     }`}
                   >
                     {tab.badge}
                   </span>
+                )}
+                {/* Gold active underline */}
+                {isSelected && (
+                  <span
+                    className="absolute -bottom-2.5 left-4 right-4 h-[3px] bg-[var(--gold)] rounded-full shadow-[0_0_8px_var(--gold)]"
+                    aria-hidden="true"
+                  />
                 )}
               </button>
             );
@@ -213,7 +221,7 @@ export function PlanView({
         </div>
 
         {/* Tab Panels */}
-        <div className="mt-6">
+        <div className="mt-8">
           <div
             role="tabpanel"
             id="panel-budget"
@@ -287,7 +295,7 @@ export function PlanView({
       </div>
 
       {/* Printable Binder View: Render all 4 sections in order when printing */}
-      <div className="hidden print:block space-y-8">
+      <div className="hidden print:block space-y-8 text-black">
         <div className="border-b-2 border-stone-900 pb-4 mb-6">
           <h2 className="text-xl font-bold font-serif">Comprehensive Event Plan Binder</h2>
           <p className="text-sm text-stone-600">Generated by EventCraft AI</p>

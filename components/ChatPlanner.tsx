@@ -2,16 +2,15 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  MessageSquare,
   X,
   Send,
   Sparkles,
   Bot,
   User,
   Loader2,
-  ChevronDown,
 } from 'lucide-react';
 import { EventPlan } from '@/lib/schemas';
+import { CrownIcon } from './CrownIcon';
 
 interface ChatPlannerProps {
   plan: EventPlan;
@@ -149,12 +148,12 @@ export function ChatPlanner({ plan }: ChatPlannerProps) {
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="flex items-center gap-2.5 px-4 py-3 rounded-full bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-sm shadow-xl hover:shadow-2xl hover:scale-105 transition-all focus:outline-none focus:ring-4 focus:ring-amber-300 cursor-pointer"
+          className="btn-cyan px-5 py-3 text-xs sm:text-sm font-extrabold flex items-center gap-2.5 shadow-2xl cursor-pointer"
           aria-label="Open Ask the Planner chat assistant"
         >
-          <Sparkles className="w-5 h-5 text-stone-950" aria-hidden="true" />
+          <CrownIcon size={18} className="text-[#04121A]" />
           <span>Ask the Planner</span>
-          <span className="w-2.5 h-2.5 rounded-full bg-stone-900 animate-pulse" />
+          <span className="w-2.5 h-2.5 rounded-full bg-[#04121A] animate-pulse" />
         </button>
       )}
 
@@ -163,19 +162,19 @@ export function ChatPlanner({ plan }: ChatPlannerProps) {
           role="dialog"
           aria-labelledby="chat-planner-title"
           aria-modal="false"
-          className="w-[90vw] sm:w-[400px] h-[520px] max-h-[80vh] bg-white rounded-2xl shadow-2xl border border-stone-200 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+          className="w-[90vw] sm:w-[420px] h-[540px] max-h-[82vh] royal-glass rounded-3xl shadow-2xl border border-[var(--gold)]/40 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200"
         >
           {/* Header */}
-          <div className="bg-stone-900 text-stone-100 p-3.5 px-4 flex items-center justify-between border-b border-stone-800">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-amber-500 text-stone-950 flex items-center justify-center font-bold">
-                <Sparkles className="w-4 h-4" aria-hidden="true" />
+          <div className="bg-[var(--surface-2)] p-4 flex items-center justify-between border-b border-[var(--royal)]/25">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-[var(--surface)] border border-[var(--gold)]/40 text-[var(--gold)] flex items-center justify-center">
+                <CrownIcon size={18} className="text-[var(--gold)]" />
               </div>
               <div>
-                <h3 id="chat-planner-title" className="text-sm font-bold text-white">
+                <h3 id="chat-planner-title" className="text-sm font-display font-bold text-white">
                   Ask the Planner
                 </h3>
-                <p className="text-[11px] text-stone-400">
+                <p className="text-[11px] text-[var(--muted)] font-medium">
                   Grounded in your {plan.intake.eventType} plan
                 </p>
               </div>
@@ -184,7 +183,7 @@ export function ChatPlanner({ plan }: ChatPlannerProps) {
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="p-1 rounded-lg text-stone-400 hover:text-white hover:bg-stone-800 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="p-1.5 rounded-xl text-[var(--muted)] hover:text-white hover:bg-[var(--surface)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--gold)]"
               aria-label="Close chat window"
             >
               <X className="w-5 h-5" aria-hidden="true" />
@@ -192,7 +191,7 @@ export function ChatPlanner({ plan }: ChatPlannerProps) {
           </div>
 
           {/* Messages scroll area */}
-          <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-stone-50/50 text-xs sm:text-sm">
+          <div className="flex-1 p-4 overflow-y-auto space-y-3.5 bg-[var(--surface)]/60 text-xs sm:text-sm">
             {messages.map((msg) => (
               <div
                 key={msg.id}
@@ -201,28 +200,28 @@ export function ChatPlanner({ plan }: ChatPlannerProps) {
                 }`}
               >
                 {msg.role === 'assistant' && (
-                  <div className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-700 flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="w-6 h-6 rounded-full bg-[var(--royal)]/30 text-[var(--gold)] border border-[var(--gold)]/30 flex items-center justify-center shrink-0 mt-0.5">
                     <Bot className="w-3.5 h-3.5" aria-hidden="true" />
                   </div>
                 )}
 
                 <div
-                  className={`p-3 rounded-2xl max-w-[85%] leading-relaxed ${
+                  className={`p-3.5 rounded-2xl max-w-[85%] leading-relaxed ${
                     msg.role === 'user'
-                      ? 'bg-amber-500 text-stone-950 font-medium rounded-tr-xs'
-                      : 'bg-white border border-stone-200 text-stone-800 shadow-xs rounded-tl-xs whitespace-pre-wrap'
+                      ? 'bg-[var(--cyan)] text-[#04121A] font-bold rounded-tr-xs shadow-md'
+                      : 'bg-[var(--surface-2)]/90 border border-[var(--royal)]/30 text-[var(--text)] shadow-xs rounded-tl-xs whitespace-pre-wrap'
                   }`}
                 >
                   {msg.content || (
-                    <span className="flex items-center gap-1.5 text-stone-400 italic">
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
+                    <span className="flex items-center gap-1.5 text-[var(--muted)] italic">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-[var(--gold)]" aria-hidden="true" />
                       Thinking...
                     </span>
                   )}
                 </div>
 
                 {msg.role === 'user' && (
-                  <div className="w-6 h-6 rounded-full bg-stone-300 text-stone-700 flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="w-6 h-6 rounded-full bg-[var(--surface-2)] text-[var(--cyan)] border border-[var(--cyan)]/30 flex items-center justify-center shrink-0 mt-0.5">
                     <User className="w-3.5 h-3.5" aria-hidden="true" />
                   </div>
                 )}
@@ -232,15 +231,15 @@ export function ChatPlanner({ plan }: ChatPlannerProps) {
           </div>
 
           {/* Suggested Prompts */}
-          <div className="p-2 bg-stone-100/70 border-t border-stone-200 flex items-center gap-1.5 overflow-x-auto text-[11px]">
-            <span className="text-stone-500 font-semibold px-1 shrink-0">Try:</span>
+          <div className="p-2.5 bg-[var(--surface-2)]/60 border-t border-[var(--royal)]/20 flex items-center gap-2 overflow-x-auto text-[11px]">
+            <span className="text-[var(--gold)] font-bold px-1 shrink-0">Try:</span>
             {sampleQuestions.map((q, idx) => (
               <button
                 key={idx}
                 type="button"
                 onClick={() => handleSendMessage(q)}
                 disabled={isStreaming}
-                className="whitespace-nowrap px-2.5 py-1 rounded-full bg-white hover:bg-amber-50 border border-stone-200 text-stone-700 transition-colors focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer disabled:opacity-50"
+                className="whitespace-nowrap px-3 py-1 rounded-full bg-[var(--surface)] hover:bg-[var(--surface-2)] border border-[var(--royal)]/40 text-[var(--muted)] hover:text-white transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--gold)] cursor-pointer disabled:opacity-50"
               >
                 {q}
               </button>
@@ -253,7 +252,7 @@ export function ChatPlanner({ plan }: ChatPlannerProps) {
               e.preventDefault();
               handleSendMessage();
             }}
-            className="p-3 bg-white border-t border-stone-200 flex items-center gap-2"
+            className="p-3 bg-[var(--surface-2)] border-t border-[var(--royal)]/25 flex items-center gap-2"
           >
             <label htmlFor="chat-input-field" className="sr-only">
               Ask your event planner a question
@@ -266,12 +265,12 @@ export function ChatPlanner({ plan }: ChatPlannerProps) {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask about budget, timeline, vendors..."
               disabled={isStreaming}
-              className="flex-1 px-3 py-2 rounded-xl border border-stone-300 text-xs sm:text-sm text-stone-900 bg-stone-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="flex-1 px-3.5 py-2 rounded-xl border border-[var(--royal)]/40 text-xs sm:text-sm text-white bg-[var(--surface)] placeholder-[var(--muted)]/50 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40 focus:border-[var(--gold)]"
             />
             <button
               type="submit"
               disabled={!input.trim() || isStreaming}
-              className="p-2 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer"
+              className="p-2 rounded-xl bg-[var(--cyan)] hover:bg-[#55EEFF] disabled:opacity-50 text-[#04121A] font-bold transition-all focus:outline-none focus:ring-2 focus:ring-[var(--cyan)] cursor-pointer shadow-sm"
               aria-label="Send question"
             >
               <Send className="w-4 h-4" aria-hidden="true" />

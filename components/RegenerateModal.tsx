@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Sparkles, X, Loader2, AlertCircle } from 'lucide-react';
 import { PlanTabId } from '@/lib/types';
+import { CrownIcon } from './CrownIcon';
 
 interface RegenerateModalProps {
   isOpen: boolean;
@@ -78,19 +79,19 @@ export function RegenerateModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="regenerate-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs animate-in fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0612]/80 backdrop-blur-md animate-in fade-in"
     >
-      <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-stone-200">
-        <div className="flex items-center justify-between pb-3 border-b border-stone-200 mb-4">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-amber-500/15 text-amber-700">
+      <div className="royal-glass rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-[var(--royal)]/40 text-[var(--text)]">
+        <div className="flex items-center justify-between pb-4 border-b border-[var(--royal)]/25 mb-5">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-[var(--surface-2)] border border-[var(--gold)]/40 text-[var(--gold)]">
               <Sparkles className="w-5 h-5" aria-hidden="true" />
             </div>
             <div>
-              <h3 id="regenerate-modal-title" className="text-base font-bold text-stone-900">
+              <h3 id="regenerate-modal-title" className="text-base font-display font-bold text-white">
                 Regenerate Plan Section
               </h3>
-              <p className="text-xs text-stone-500">
+              <p className="text-xs text-[var(--muted)]">
                 Refine a single component with bespoke guidelines
               </p>
             </div>
@@ -99,7 +100,7 @@ export function RegenerateModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="p-1.5 rounded-xl text-[var(--muted)] hover:text-white hover:bg-[var(--surface-2)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--gold)]"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" aria-hidden="true" />
@@ -111,7 +112,7 @@ export function RegenerateModal({
           <div>
             <label
               htmlFor="target-section-select"
-              className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1"
+              className="block text-xs font-bold text-[var(--gold)] uppercase tracking-wider mb-1.5"
             >
               Choose Section to Revise
             </label>
@@ -122,7 +123,7 @@ export function RegenerateModal({
                 setSection(e.target.value as PlanTabId);
                 setInstruction('');
               }}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 text-sm text-stone-900 bg-stone-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full px-4 py-2.5 rounded-xl border border-[var(--royal)]/40 text-sm text-white bg-[var(--surface-2)] focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40"
             >
               <option value="budget">Budget Allocation</option>
               <option value="timeline">Timeline & Milestones</option>
@@ -133,16 +134,16 @@ export function RegenerateModal({
 
           {/* Quick Prompts */}
           <div>
-            <span className="text-xs font-semibold text-stone-600 block mb-1.5">
+            <span className="text-xs font-bold text-[var(--muted)] block mb-2">
               Quick Suggestions:
             </span>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-2">
               {samplePrompts[section]?.map((prompt, idx) => (
                 <button
                   key={idx}
                   type="button"
                   onClick={() => setInstruction(prompt)}
-                  className="text-left text-xs p-2 rounded-lg bg-stone-50 hover:bg-amber-50 border border-stone-200 hover:border-amber-300 text-stone-700 transition-colors cursor-pointer"
+                  className="text-left text-xs p-2.5 rounded-xl bg-[var(--surface-2)]/80 hover:bg-[var(--surface-2)] border border-[var(--royal)]/30 hover:border-[var(--gold)]/40 text-[var(--text)] transition-colors cursor-pointer"
                 >
                   &ldquo;{prompt}&rdquo;
                 </button>
@@ -154,9 +155,9 @@ export function RegenerateModal({
           <div>
             <label
               htmlFor="regenerate-instruction"
-              className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1"
+              className="block text-xs font-bold text-[var(--gold)] uppercase tracking-wider mb-1.5"
             >
-              Your Custom Instruction <span className="text-rose-600">*</span>
+              Your Custom Instruction <span className="text-[var(--cyan)]">*</span>
             </label>
             <textarea
               id="regenerate-instruction"
@@ -167,39 +168,39 @@ export function RegenerateModal({
                 if (error) setError(null);
               }}
               placeholder={`e.g. Make the ${sectionLabels[section].toLowerCase()} more budget-conscious and add outdoor contingency options.`}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 text-sm text-stone-900 bg-stone-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full px-4 py-2.5 rounded-xl border border-[var(--royal)]/40 text-sm text-white bg-[var(--surface-2)] focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/40 placeholder-[var(--muted)]/50"
             />
           </div>
 
           {error && (
-            <div className="flex items-center gap-2 p-2.5 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs">
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-rose-950/50 text-rose-300 border border-rose-500/30 text-xs">
               <AlertCircle className="w-4 h-4 shrink-0" aria-hidden="true" />
               <span>{error}</span>
             </div>
           )}
 
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-stone-200">
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-[var(--royal)]/25">
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 text-xs font-semibold text-stone-600 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 rounded-xl transition-colors cursor-pointer"
+              className="px-4 py-2 text-xs font-bold text-[var(--muted)] hover:text-white bg-[var(--surface-2)] hover:bg-[var(--surface-2)]/80 rounded-xl transition-colors cursor-pointer border border-[var(--royal)]/30"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || !instruction.trim()}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-stone-950 font-bold text-xs shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-amber-400 disabled:opacity-50 cursor-pointer"
+              className="btn-cyan px-5 py-2.5 text-xs font-black cursor-pointer shadow-md disabled:opacity-50"
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                  <Loader2 className="w-4 h-4 animate-spin text-[#04121A]" aria-hidden="true" />
                   <span>Revising Section...</span>
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4" aria-hidden="true" />
+                  <Sparkles className="w-4 h-4 text-[#04121A]" aria-hidden="true" />
                   <span>Generate Revisions</span>
                 </>
               )}

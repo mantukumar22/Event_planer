@@ -5,7 +5,6 @@ import {
   Palette,
   Sparkles,
   Utensils,
-  Lightbulb,
   PiggyBank,
   Check,
   GlassWater,
@@ -27,18 +26,18 @@ export function PersonalizedIdeasTab({
   return (
     <div className="space-y-6">
       {/* Top Banner */}
-      <div className="bg-white rounded-2xl p-5 sm:p-6 border border-stone-200 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="royal-glass rounded-3xl p-5 sm:p-6 border border-[var(--royal)]/40 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+            <span className="text-xs font-bold uppercase tracking-wider text-[var(--gold)] bg-[var(--surface-2)] px-3 py-1 rounded-full border border-[var(--gold)]/30">
               Creative Curation & Tips
             </span>
-            <span className="text-xs font-semibold text-stone-600 bg-stone-100 px-2.5 py-1 rounded-full">
+            <span className="text-xs font-semibold text-[var(--cyan)] bg-[var(--surface-2)] px-3 py-1 rounded-full border border-[var(--cyan)]/30">
               Vibe: {themeVibe}
             </span>
           </div>
 
-          <p className="mt-2 text-sm text-stone-600 max-w-2xl">
+          <p className="mt-2.5 text-sm text-[var(--muted)] max-w-2xl leading-relaxed">
             Bespoke aesthetic palettes, signature menu ideas tailored to dietary preferences, crowd-pleasing activities, and actionable cost-saving hacks.
           </p>
         </div>
@@ -46,9 +45,9 @@ export function PersonalizedIdeasTab({
         <button
           type="button"
           onClick={onOpenRegenerate}
-          className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer ml-auto md:ml-0"
+          className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-[var(--surface-2)] hover:bg-[var(--royal)]/30 text-[var(--gold)] border border-[var(--gold)]/40 text-xs font-bold transition-all focus:outline-none focus:ring-2 focus:ring-[var(--gold)] cursor-pointer ml-auto md:ml-0"
         >
-          <Sparkles className="w-3.5 h-3.5 text-amber-600" aria-hidden="true" />
+          <Sparkles className="w-3.5 h-3.5 text-[var(--gold)]" aria-hidden="true" />
           <span>Regenerate Ideas</span>
         </button>
       </div>
@@ -57,46 +56,46 @@ export function PersonalizedIdeasTab({
         {/* Card 1: Theme & Decor Aesthetics */}
         <section
           aria-labelledby="ideas-theme-heading"
-          className="bg-white rounded-2xl p-6 border border-stone-200 shadow-sm flex flex-col"
+          className="royal-glass rounded-3xl p-6 sm:p-8 border border-[var(--royal)]/40 shadow-xl flex flex-col"
         >
-          <div className="flex items-center gap-2 pb-3 mb-4 border-b border-stone-100">
-            <div className="p-2 rounded-xl bg-rose-50 text-rose-600">
+          <div className="flex items-center gap-3 pb-4 mb-5 border-b border-[var(--royal)]/20">
+            <div className="p-2.5 rounded-xl bg-[var(--royal)]/30 text-[var(--magenta)] border border-[var(--magenta)]/30">
               <Palette className="w-5 h-5" aria-hidden="true" />
             </div>
             <div>
-              <h3 id="ideas-theme-heading" className="text-sm font-bold text-stone-900">
+              <h3 id="ideas-theme-heading" className="font-display font-bold text-sm sm:text-base text-white">
                 Aesthetic Vision & Color Palette
               </h3>
-              <p className="text-xs text-stone-500">Cohesive motifs and atmosphere styling</p>
+              <p className="text-xs text-[var(--muted)]">Cohesive motifs and atmosphere styling</p>
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-5">
             <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-stone-700 mb-1">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--gold)] mb-1.5">
                 Concept & Atmosphere
               </h4>
-              <p className="text-xs sm:text-sm text-stone-600 leading-relaxed bg-stone-50 p-3.5 rounded-xl border border-stone-200/60">
+              <p className="text-xs sm:text-sm text-[var(--text)] leading-relaxed bg-[var(--surface-2)]/80 p-4 rounded-2xl border border-[var(--royal)]/25">
                 {ideas.themeDetails.concept}
               </p>
             </div>
 
             <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-stone-700 mb-2">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--gold)] mb-2.5">
                 Recommended Color Palette
               </h4>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2.5">
                 {ideas.themeDetails.colorPalette.map((color, i) => (
                   <div
                     key={i}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-stone-100 border border-stone-200 text-xs font-semibold text-stone-800"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[var(--surface-2)] border border-[var(--royal)]/30 text-xs font-bold text-white"
                   >
                     <span
-                      className="w-3.5 h-3.5 rounded-full shadow-inner border border-black/10 shrink-0"
+                      className="w-3.5 h-3.5 rounded-full shadow-md border border-white/20 shrink-0"
                       style={{
                         backgroundColor: color.startsWith('#')
                           ? color
-                          : ['#B45309', '#047857', '#BE185D', '#4338CA', '#D97706'][i % 5],
+                          : ['#6D28D9', '#E879F9', '#F5C451', '#22E5FF', '#A78BFA'][i % 5],
                       }}
                       aria-hidden="true"
                     />
@@ -107,13 +106,13 @@ export function PersonalizedIdeasTab({
             </div>
 
             <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-stone-700 mb-2">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--gold)] mb-2.5">
                 Key Decor & Atmospheric Elements
               </h4>
-              <ul className="space-y-1.5 text-xs text-stone-700">
+              <ul className="space-y-2 text-xs sm:text-sm text-[var(--text)]">
                 {ideas.themeDetails.decorElements.map((elem, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" aria-hidden="true" />
+                  <li key={i} className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-[var(--cyan)] shrink-0 mt-0.5" aria-hidden="true" />
                     <span>{elem}</span>
                   </li>
                 ))}
@@ -125,49 +124,49 @@ export function PersonalizedIdeasTab({
         {/* Card 2: Custom Menu & Signature Beverage */}
         <section
           aria-labelledby="ideas-menu-heading"
-          className="bg-white rounded-2xl p-6 border border-stone-200 shadow-sm flex flex-col"
+          className="royal-glass rounded-3xl p-6 sm:p-8 border border-[var(--royal)]/40 shadow-xl flex flex-col"
         >
-          <div className="flex items-center gap-2 pb-3 mb-4 border-b border-stone-100">
-            <div className="p-2 rounded-xl bg-amber-50 text-amber-600">
+          <div className="flex items-center gap-3 pb-4 mb-5 border-b border-[var(--royal)]/20">
+            <div className="p-2.5 rounded-xl bg-[var(--surface-2)] text-[var(--gold)] border border-[var(--gold)]/30">
               <Utensils className="w-5 h-5" aria-hidden="true" />
             </div>
             <div>
-              <h3 id="ideas-menu-heading" className="text-sm font-bold text-stone-900">
+              <h3 id="ideas-menu-heading" className="font-display font-bold text-sm sm:text-base text-white">
                 Custom Menu & Beverage Concepts
               </h3>
-              <p className="text-xs text-stone-500">Dietary-conscious tasting roadmap</p>
+              <p className="text-xs text-[var(--muted)]">Dietary-conscious tasting roadmap</p>
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-5">
             {/* Signature Drink */}
-            <div className="p-3.5 rounded-xl bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-amber-500/10 border border-amber-300/40">
-              <div className="flex items-center gap-2 text-xs font-bold text-amber-900 uppercase tracking-wider mb-1">
-                <GlassWater className="w-4 h-4 text-amber-600" aria-hidden="true" />
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-[var(--royal)]/40 via-[var(--surface-2)] to-[var(--magenta)]/30 border border-[var(--magenta)]/40">
+              <div className="flex items-center gap-2 text-xs font-bold text-[var(--gold)] uppercase tracking-wider mb-1">
+                <GlassWater className="w-4 h-4 text-[var(--cyan)]" aria-hidden="true" />
                 <span>Signature Cocktail / Mocktail</span>
               </div>
-              <p className="text-xs sm:text-sm font-bold text-stone-900">
+              <p className="text-sm sm:text-base font-extrabold text-white">
                 {ideas.customMenu.signatureCocktailMocktail}
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <div className="p-3 bg-stone-50 rounded-xl border border-stone-200/60">
-                <h4 className="font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+              <div className="p-3.5 bg-[var(--surface-2)]/80 rounded-2xl border border-[var(--royal)]/25">
+                <h4 className="font-bold uppercase tracking-wider text-[var(--cyan)] mb-2">
                   Appetizers & Starters
                 </h4>
-                <ul className="space-y-1 list-disc list-inside text-stone-600">
+                <ul className="space-y-1.5 list-disc list-inside text-[var(--text)]">
                   {ideas.customMenu.appetizers.map((app, i) => (
                     <li key={i}>{app}</li>
                   ))}
                 </ul>
               </div>
 
-              <div className="p-3 bg-stone-50 rounded-xl border border-stone-200/60">
-                <h4 className="font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+              <div className="p-3.5 bg-[var(--surface-2)]/80 rounded-2xl border border-[var(--royal)]/25">
+                <h4 className="font-bold uppercase tracking-wider text-[var(--magenta)] mb-2">
                   Mains & Entrees
                 </h4>
-                <ul className="space-y-1 list-disc list-inside text-stone-600">
+                <ul className="space-y-1.5 list-disc list-inside text-[var(--text)]">
                   {ideas.customMenu.mains.map((main, i) => (
                     <li key={i}>{main}</li>
                   ))}
@@ -175,14 +174,14 @@ export function PersonalizedIdeasTab({
               </div>
             </div>
 
-            <div className="text-xs bg-stone-50 p-3 rounded-xl border border-stone-200/60 flex items-start gap-2">
-              <span className="font-bold text-stone-700 shrink-0">Dessert:</span>
-              <span className="text-stone-600">{ideas.customMenu.dessert}</span>
+            <div className="text-xs sm:text-sm bg-[var(--surface-2)]/80 p-3.5 rounded-2xl border border-[var(--royal)]/25 flex items-start gap-2">
+              <span className="font-bold text-[var(--gold)] shrink-0">Dessert:</span>
+              <span className="text-[var(--text)]">{ideas.customMenu.dessert}</span>
             </div>
 
             {ideas.customMenu.dietaryNotes && (
-              <div className="text-xs bg-emerald-50 text-emerald-800 p-2.5 rounded-xl border border-emerald-200">
-                <strong>Dietary & Allergy Accommodations:</strong> {ideas.customMenu.dietaryNotes}
+              <div className="text-xs bg-emerald-950/60 text-emerald-300 p-3 rounded-2xl border border-emerald-500/30">
+                <strong className="text-emerald-200">Dietary & Allergy Accommodations:</strong> {ideas.customMenu.dietaryNotes}
               </div>
             )}
           </div>
@@ -191,35 +190,35 @@ export function PersonalizedIdeasTab({
         {/* Card 3: Activities & Entertainment Highlights */}
         <section
           aria-labelledby="ideas-activities-heading"
-          className="bg-white rounded-2xl p-6 border border-stone-200 shadow-sm flex flex-col"
+          className="royal-glass rounded-3xl p-6 sm:p-8 border border-[var(--royal)]/40 shadow-xl flex flex-col"
         >
-          <div className="flex items-center gap-2 pb-3 mb-4 border-b border-stone-100">
-            <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600">
+          <div className="flex items-center gap-3 pb-4 mb-5 border-b border-[var(--royal)]/20">
+            <div className="p-2.5 rounded-xl bg-[var(--royal)]/30 text-[var(--cyan)] border border-[var(--cyan)]/30">
               <PartyPopper className="w-5 h-5" aria-hidden="true" />
             </div>
             <div>
-              <h3 id="ideas-activities-heading" className="text-sm font-bold text-stone-900">
+              <h3 id="ideas-activities-heading" className="font-display font-bold text-sm sm:text-base text-white">
                 Curated Activities & Icebreakers
               </h3>
-              <p className="text-xs text-stone-500">Memorable moments designed for guest engagement</p>
+              <p className="text-xs text-[var(--muted)]">Memorable moments designed for guest engagement</p>
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-3.5">
             {ideas.activities.map((act, i) => (
               <div
                 key={i}
-                className="p-3.5 rounded-xl border border-stone-200/80 hover:border-amber-300 transition-colors bg-stone-50/50"
+                className="p-4 rounded-2xl border border-[var(--royal)]/30 hover:border-[var(--gold)]/40 transition-colors bg-[var(--surface-2)]/70"
               >
                 <div className="flex items-center justify-between gap-2 mb-1">
-                  <h4 className="text-xs sm:text-sm font-bold text-stone-900">
+                  <h4 className="text-xs sm:text-sm font-bold text-white">
                     {act.title}
                   </h4>
-                  <span className="text-[11px] font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200 shrink-0">
+                  <span className="text-[10px] font-bold text-[var(--cyan)] bg-[var(--royal)]/30 px-2.5 py-0.5 rounded-full border border-[var(--cyan)]/30 shrink-0">
                     {act.targetAudience}
                   </span>
                 </div>
-                <p className="text-xs text-stone-600 leading-relaxed">
+                <p className="text-xs text-[var(--muted)] leading-relaxed mt-1">
                   {act.description}
                 </p>
               </div>
@@ -230,35 +229,35 @@ export function PersonalizedIdeasTab({
         {/* Card 4: Money-Saving Tips ("Budget Hackers") */}
         <section
           aria-labelledby="ideas-hacks-heading"
-          className="bg-white rounded-2xl p-6 border border-stone-200 shadow-sm flex flex-col"
+          className="royal-glass rounded-3xl p-6 sm:p-8 border border-[var(--royal)]/40 shadow-xl flex flex-col"
         >
-          <div className="flex items-center gap-2 pb-3 mb-4 border-b border-stone-100">
-            <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
+          <div className="flex items-center gap-3 pb-4 mb-5 border-b border-[var(--royal)]/20">
+            <div className="p-2.5 rounded-xl bg-emerald-950/50 text-emerald-400 border border-emerald-500/30">
               <PiggyBank className="w-5 h-5" aria-hidden="true" />
             </div>
             <div>
-              <h3 id="ideas-hacks-heading" className="text-sm font-bold text-stone-900">
+              <h3 id="ideas-hacks-heading" className="font-display font-bold text-sm sm:text-base text-white">
                 Strategic Money-Saving Hacks
               </h3>
-              <p className="text-xs text-stone-500">High impact savings without sacrificing guest experience</p>
+              <p className="text-xs text-[var(--muted)]">High impact savings without sacrificing guest experience</p>
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-3.5">
             {ideas.moneySavingHacks.map((hack, i) => (
               <div
                 key={i}
-                className="p-3.5 rounded-xl border border-emerald-200/70 bg-emerald-50/20"
+                className="p-4 rounded-2xl border border-emerald-500/30 bg-emerald-950/20"
               >
                 <div className="flex items-center justify-between gap-2 mb-1">
-                  <h4 className="text-xs sm:text-sm font-bold text-stone-900">
+                  <h4 className="text-xs sm:text-sm font-bold text-white">
                     {hack.tip}
                   </h4>
-                  <span className="text-xs font-bold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full border border-emerald-200 shrink-0">
+                  <span className="text-xs font-bold text-emerald-400 bg-emerald-950/80 px-3 py-0.5 rounded-full border border-emerald-500/40 shrink-0">
                     Save {hack.estimatedSavings}
                   </span>
                 </div>
-                <p className="text-xs text-stone-600 leading-relaxed">
+                <p className="text-xs text-[var(--muted)] leading-relaxed mt-1">
                   {hack.implementation}
                 </p>
               </div>
