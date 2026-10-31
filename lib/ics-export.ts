@@ -48,7 +48,7 @@ export function generateIcsContent(plan: EventPlan): string {
   const lines: string[] = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//EventCraft AI//Royal Event Planner//EN',
+    'PRODID:-//EventCraft AI//Event Schedule RFC 5545//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     `X-WR-CALNAME:${escapeIcsText(plan.intake.eventTitle)}`,

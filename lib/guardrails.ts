@@ -14,13 +14,15 @@ export function sanitizeString(input: string, maxLength?: number): string {
 
   let sanitized = input
     // Remove null bytes and non-printable control characters (except newline \n and tab \t)
-    // eslint-disable-next-line no-control-regex
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
-    // Strip HTML tags (<script>, <iframe>, <img onerror>, etc.)
-    .replace(/<[^>]*>?/gm, '')
-    // Replace raw angle brackets with safe text
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
+    // Strip script, style, and iframe tags along with their inner contents
+    .replace(/<(?:script|style|iframe|object|embed)[\s\S]*?>[\s\S]*?<\/(?:script|style|iframe|object|embed)>/gim, '')
+    .replace(/<(?:script|style|iframe|object|embed)[^>]*\/?>/gim, '')
+    // Strip remaining HTML tags
+    .replace(/<[^>]+>/gm, '')
+    // Strip orphaned angle brackets
+    .replace(/</g, '')
+    .replace(/>/g, '')
     .trim();
 
   if (maxLength && maxLength > 0) {

@@ -1,28 +1,8 @@
 import type { Metadata } from 'next';
-import { Unbounded, Playfair_Display, Plus_Jakarta_Sans } from 'next/font/google';
+import '@fontsource-variable/unbounded';
+import '@fontsource-variable/plus-jakarta-sans';
+import '@fontsource/playfair-display/400-italic.css';
 import './globals.css';
-
-const unbounded = Unbounded({
-  subsets: ['latin'],
-  variable: '--font-unbounded',
-  weight: ['400', '600', '700', '800', '900'],
-  display: 'swap',
-});
-
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  variable: '--font-playfair',
-  style: ['normal', 'italic'],
-  weight: ['400', '600', '700'],
-  display: 'swap',
-});
-
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  variable: '--font-sans',
-  weight: ['400', '500', '600', '700'],
-  display: 'swap',
-});
 
 export const metadata: Metadata = {
   title: 'EventCraft AI - Royal Event Planning Assistant',
@@ -59,7 +39,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full scroll-smooth dark" style={{ colorScheme: 'dark' }}>
       <body
-        className={`${unbounded.variable} ${playfair.variable} ${jakarta.variable} font-sans min-h-full bg-[var(--ink)] text-[var(--text)] antialiased selection:bg-[var(--royal)] selection:text-[var(--text)] flex flex-col film-grain`}
+        className="font-body min-h-full bg-[var(--ink)] text-[var(--text)] antialiased selection:bg-[var(--royal)] selection:text-[var(--text)] flex flex-col film-grain"
         suppressHydrationWarning
       >
         <a

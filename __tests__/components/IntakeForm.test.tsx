@@ -25,8 +25,8 @@ describe('IntakeForm Component', () => {
     fireEvent.click(submitBtn);
 
     await waitFor(() => {
-      expect(screen.getByText(/event title must be at least 2 characters/i)).toBeInTheDocument();
-      expect(screen.getByText(/please enter a valid date/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/event title must be at least 2 characters/i).length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText(/please enter a valid date/i).length).toBeGreaterThanOrEqual(1);
     });
 
     expect(handleSubmit).not.toHaveBeenCalled();

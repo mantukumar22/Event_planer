@@ -12,12 +12,17 @@
   --color-app-text: var(--text);
   --color-app-muted: var(--muted);
 
-  --font-display: var(--font-unbounded), system-ui, sans-serif;
-  --font-accent: var(--font-playfair), Georgia, serif;
-  --font-sans: var(--font-sans), system-ui, sans-serif;
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-accent: var(--font-accent);
+  --font-sans: var(--font-body);
 }
 
 :root {
+  --font-display: "Unbounded Variable", system-ui, sans-serif;
+  --font-body: "Plus Jakarta Sans Variable", system-ui, sans-serif;
+  --font-accent: "Playfair Display", Georgia, serif;
+
   --ink: #0A0612;
   --surface: #140B24;
   --surface-2: #1D1033;
@@ -29,6 +34,18 @@
   --text: #F5F3FF;
   --muted: #B9B0D6;
   color-scheme: dark;
+}
+
+body {
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+}
+
+em, i, .font-accent {
+  font-family: var(--font-accent);
 }
 
 @media (prefers-color-scheme: light) {
